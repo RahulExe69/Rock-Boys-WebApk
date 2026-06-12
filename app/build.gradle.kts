@@ -22,7 +22,7 @@ android {
     minSdk = 24
     targetSdk = 36
     versionCode = 5
-    versionName = "1.1.1"
+    versionName = "1.2"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -153,6 +153,7 @@ val copyApkToAllOutputs = tasks.register<CopyApkTask>("copyApkToAllOutputs") {
     dependsOn(tasks.matching { it.name == "packageDebug" })
     sourceApk.set(layout.projectDirectory.file("build/outputs/apk/debug/app-debug.apk"))
     outputFile.set(layout.projectDirectory.file("../.build-outputs/app-debug.apk"))
+    outputs.upToDateWhen { false }
 }
 
 tasks.matching { it.name == "assembleDebug" }.configureEach {

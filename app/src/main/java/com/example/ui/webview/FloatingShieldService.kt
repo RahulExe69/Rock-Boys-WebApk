@@ -52,8 +52,8 @@ class FloatingShieldService : Service() {
         val context = this
         val floatButton = ImageView(context).apply {
             imageAlpha = 220
-            // Set official APK app icon instead of standard sync icon
-            setImageResource(com.example.R.drawable.img_app_icon)
+            // Set standard refresh/sync icon
+            setImageResource(android.R.drawable.ic_popup_sync)
             
             // Clean, non-vibrant light theme design
             // Off-white sleek circular design with subtle light gray border
@@ -75,7 +75,7 @@ class FloatingShieldService : Service() {
             }
 
             scaleType = ImageView.ScaleType.CENTER_INSIDE
-            val pad = (8 * resources.displayMetrics.density).toInt()
+            val pad = (12 * resources.displayMetrics.density).toInt()
             setPadding(pad, pad, pad, pad)
             
             // Set initial alpha based on user's transparency preference
