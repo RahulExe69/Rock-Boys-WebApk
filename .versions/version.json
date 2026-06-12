@@ -1,0 +1,7 @@
+{
+  "versionCode": 5,
+  "versionName": "1.1.1",
+  "changeLog": "Updated Raid Reload floating overlay button to use the official custom RockBoys APK theme launcher icon in a high-density, beautifully aligned outer ring container.",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
+  "forceUpdate": true
+}

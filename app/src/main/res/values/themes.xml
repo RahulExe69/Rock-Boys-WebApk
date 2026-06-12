@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Application Theme -->
+    <style name="Theme.MyApplication" parent="android:Theme.DeviceDefault.NoActionBar">
+        <!-- Optional: Ensure starting activity window matches our brand styling -->
+        <item name="android:windowBackground">@color/cyber_black</item>
+    </style>
+
+    <!-- Professional Splash Screen starting Theme -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/cyber_black</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
+        <item name="postSplashScreenTheme">@style/Theme.MyApplication</item>
+    </style>
+</resources>

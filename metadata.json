@@ -1,0 +1,8 @@
+{
+  "name": "Remix: RockBoys Apk",
+  "description": "Official premium native experience for the RockBoys gaming community.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
