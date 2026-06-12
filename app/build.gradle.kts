@@ -21,8 +21,8 @@ android {
     applicationId = "com.rockboys.exe"
     minSdk = 24
     targetSdk = 36
-    versionCode = 5
-    versionName = "1.2"
+    versionCode = 7
+    versionName = "1.3"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -140,9 +140,22 @@ abstract class CopyApkTask : DefaultTask() {
         val src = sourceApk.get().asFile
         val dest = outputFile.get().asFile
         if (src.exists()) {
+            // 1. HIDDEN PATH (original)
             dest.parentFile.mkdirs()
             src.copyTo(dest, overwrite = true)
             println("Successfully copied APK to compiler output directory: ${dest.absolutePath}")
+
+            // 2. VISIBLE PATH (no leading dot)
+            val visibleDestDir = File(dest.parentFile.parentFile, "build-outputs")
+            visibleDestDir.mkdirs()
+            val visibleDest = File(visibleDestDir, "app-debug.apk")
+            src.copyTo(visibleDest, overwrite = true)
+            println("Successfully copied APK to visible output directory: ${visibleDest.absolutePath}")
+
+            // 3. PROJECT ROOT PATH (highest visibility)
+            val rootDest = File(dest.parentFile.parentFile, "app-debug.apk")
+            src.copyTo(rootDest, overwrite = true)
+            println("Successfully copied APK directly to project root: ${rootDest.absolutePath}")
         } else {
             throw GradleException("Source APK not found at ${src.absolutePath}")
         }
