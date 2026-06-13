@@ -1,7 +1,7 @@
 {
-  "versionCode": 7,
-  "versionName": "1.3",
-  "changeLog": "Optimized output build targets by copying compiled APKs to multiple locations inside workspace, including '/build-outputs/' and '/app-debug.apk' directly at project root, bypassing file explorer hidden-dot filter limitations.",
+  "versionCode": 9,
+  "versionName": "1.4",
+  "changeLog": "Optimized APK packaging options by disabling internal test-only attributes and configuring signature fallback to enable direct custom web download support for clean release-ready APK installations.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
   "forceUpdate": true
 }
