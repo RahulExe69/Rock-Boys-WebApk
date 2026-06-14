@@ -1,4 +1,5 @@
 import java.io.File
+import java.util.Base64
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.Internal
@@ -13,6 +14,20 @@ plugins {
   alias(libs.plugins.secrets)
 }
 
+// Ensure debug.keystore is decoded from its Base64 Representation to guarantee valid and consistent signing
+val debugKeystoreFile = File(rootDir, "debug.keystore")
+val debugKeystoreBase64File = File(rootDir, "debug.keystore.base64")
+if (debugKeystoreBase64File.exists() && !debugKeystoreFile.exists()) {
+    try {
+        val base64Content = debugKeystoreBase64File.readText().trim()
+        val decodedBytes = Base64.getDecoder().decode(base64Content)
+        debugKeystoreFile.writeBytes(decodedBytes)
+        println("Successfully decoded local persistent debug.keystore from Base64 configuration.")
+    } catch (e: Exception) {
+        println("Error decoding debug.keystore: ${e.message}")
+    }
+}
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
@@ -21,8 +36,8 @@ android {
     applicationId = "com.rockboys.exe"
     minSdk = 24
     targetSdk = 36
-    versionCode = 9
-    versionName = "1.4"
+    versionCode = 11
+    versionName = "1.5"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

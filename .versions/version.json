@@ -1,7 +1,7 @@
 {
-  "versionCode": 9,
-  "versionName": "1.4",
-  "changeLog": "Optimized APK packaging options by disabling internal test-only attributes and configuring signature fallback to enable direct custom web download support for clean release-ready APK installations.",
+  "versionCode": 11,
+  "versionName": "1.5",
+  "changeLog": "Configured dynamic Base64 decoder at Gradle configuration-time to restore authentic, persistent debug.keystore, certifying identical and valid signatures across all builds.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
   "forceUpdate": true
 }
