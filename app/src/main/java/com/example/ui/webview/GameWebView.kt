@@ -29,6 +29,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -121,7 +122,7 @@ fun GameWebView(
         if (window != null) {
             val statusBarColor = when {
                 showForceUpdateScreen -> Color(0xFF2E1A0C)
-                isRaidReloadActive -> Color(0xFF2E1A0C)
+                isRaidReloadActive -> Color(0xFF423C35)
                 isPageLoading -> Color(0xFF07090E)
                 else -> Color(0xFFEAD8C3)
             }
@@ -639,14 +640,10 @@ fun GameWebView(
             // CoC Interactive Under Maintenance Overlay screen for Raid Reload
             AnimatedVisibility(
                 visible = isRaidReloadActive,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically()
+                enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(300)),
+                exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
             ) {
-                RaidReloadMaintenanceScreen(
-                    onReturnClick = {
-                        isRaidReloadActive = false
-                    }
-                )
+                RaidReloadMaintenanceScreen()
             }
 
             // Force Dynamic APK Update Overlay Screen
@@ -903,21 +900,21 @@ fun ClashShieldIconView(modifier: Modifier = Modifier) {
         }
         drawPath(
             path = path,
-            color = Color(0xFF6366F1) // Slate Blue / Indigo
+            color = Color(0xFFF3C32B) // Clash Gold
         )
         drawPath(
             path = path,
-            color = Color(0xFF4F46E5),
+            color = Color(0xFF4C473E), // Wood Charcoal Outline
             style = Stroke(width = 3.dp.toPx())
         )
         drawLine(
-            color = Color.White.copy(alpha = 0.45f),
+            color = Color(0xFF4C473E).copy(alpha = 0.5f),
             start = Offset(w * 0.5f, h * 0.18f),
             end = Offset(w * 0.5f, h * 0.85f),
             strokeWidth = 2.5.dp.toPx()
         )
         drawLine(
-            color = Color.White.copy(alpha = 0.45f),
+            color = Color(0xFF4C473E).copy(alpha = 0.5f),
             start = Offset(w * 0.25f, h * 0.45f),
             end = Offset(w * 0.75f, h * 0.45f),
             strokeWidth = 2.5.dp.toPx()
@@ -1010,9 +1007,40 @@ object RaidReloadManager {
 }
 
 @Composable
-fun RaidReloadMaintenanceScreen(
-    onReturnClick: () -> Unit
+fun Clash3DButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    baseColor: Color = Color(0xFF4BAC1A),
+    shadowColor: Color = Color(0xFF28650A),
+    borderColor: Color = Color(0xFF1B4006),
+    shape: androidx.compose.foundation.shape.RoundedCornerShape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+    content: @Composable RowScope.() -> Unit
 ) {
+    val alpha = if (enabled) 1f else 0.5f
+    Box(
+        modifier = modifier
+            .alpha(alpha)
+            .clickable(enabled = enabled, onClick = onClick)
+            .background(shadowColor, shape = shape)
+            .padding(bottom = 4.dp) // shadow depth
+            .background(baseColor, shape = shape)
+            .border(width = 1.5.dp, color = borderColor, shape = shape),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.padding(contentPadding),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun RaidReloadMaintenanceScreen() {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -1050,27 +1078,157 @@ fun RaidReloadMaintenanceScreen(
         }
     }
 
+    // Modal dialogue choice option triggers
+    var showSetupOptionsDialog by remember { mutableStateOf(false) }
+
     // Handle initial configurations on first mounting
     LaunchedEffect(Unit) {
         FloatingShieldService.buttonSizeDp = shieldSize.toInt()
         FloatingShieldService.idleTransparencyPercent = shieldTransparency.toInt()
     }
 
-    // Clean, modern slate-light design tokens
-    val lightBg = Color(0xFFF8FAFC) // slate-50
-    val textPrimary = Color(0xFF0F172A) // slate-900
-    val textSecondary = Color(0xFF475569) // slate-600
-    val cardBg = Color(0xFFFFFFFF)
-    val cardBorder = Color(0xFFE2E8F0) // slate-200
-    val indigoPrimary = Color(0xFF4F46E5) // Indigo-600
-    val indigoLight = Color(0xFFEEF2FF) // Indigo-50
-    val greenSuccess = Color(0xFF10B981) // Green-500
-    val greenSuccessLight = Color(0xFFECFDF5) // Green-50
+    val bgWebsite = Color(0xFFEBE8DF) // Warm beige background matching the website
+    val titleBarColor = Color(0xFF423C35) // Deep Slate/Charcoal for headers
+    val parchmentBg = Color(0xFFF6F4EB) // Creamy white container background
+    val borderCharcoal = Color(0xFF4C473E) // Muted border color
+    val textPrimary = Color(0xFF3C342C) // Warm dark brown/charcoal
+    val textSecondary = Color(0xFF6B5E52) // Soft medium brown text
+
+    // Clash 3D Green Button Colors
+    val cocGreen = Color(0xFF4BAC1A)
+    val cocGreenShadow = Color(0xFF28650A)
+
+    // Clash 3D Blue Button Colors
+    val cocBlue = Color(0xFF2D76EC)
+    val cocBlueShadow = Color(0xFF1542A1)
+
+    // Setup options dialog overlay if clicked Setup Settings
+    if (showSetupOptionsDialog) {
+        androidx.compose.ui.window.Dialog(onDismissRequest = { showSetupOptionsDialog = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(parchmentBg, shape = RoundedCornerShape(16.dp))
+                    .border(width = 3.dp, color = borderCharcoal, shape = RoundedCornerShape(16.dp)),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Wooden charcoal top header strip
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(titleBarColor, shape = RoundedCornerShape(topStart = 13.dp, topEnd = 13.dp))
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "CHOOSE SETUP OPTION",
+                        color = Color.White,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 0.5.sp
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Configure system tools to activate simulation shield features:",
+                        color = textPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Option 1: Setup VPN Protection
+                    Clash3DButton(
+                        onClick = {
+                            showSetupOptionsDialog = false
+                            val vpnIntent = android.net.VpnService.prepare(context)
+                            if (vpnIntent != null) {
+                                vpnLauncher.launch(vpnIntent)
+                            } else {
+                                Toast.makeText(context, "VPN protection already configured & authenticated.", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        baseColor = cocBlue,
+                        shadowColor = cocBlueShadow,
+                        borderColor = borderCharcoal
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "VPN Lock Icon",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Authorize VPN Shield",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Option 2: Setup Overlay Permission
+                    Clash3DButton(
+                        onClick = {
+                            showSetupOptionsDialog = false
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                                val intent = Intent(
+                                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                                    Uri.parse("package:${context.packageName}")
+                                )
+                                launcher.launch(intent)
+                            } else {
+                                Toast.makeText(context, "Overlay permission is granted by default on your system.", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        baseColor = cocGreen,
+                        shadowColor = cocGreenShadow,
+                        borderColor = borderCharcoal
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Build,
+                            contentDescription = "Overlay Drawing Action",
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Authorize Floating Menu",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Cancellation
+                    OutlinedButton(
+                        onClick = { showSetupOptionsDialog = false },
+                        border = BorderStroke(1.5.dp, borderCharcoal),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = textPrimary)
+                    ) {
+                        Text(text = "Cancel", fontWeight = FontWeight.Black, fontSize = 12.sp)
+                    }
+                }
+            }
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(lightBg)
+            .background(bgWebsite)
             .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         Column(
@@ -1078,105 +1236,81 @@ fun RaidReloadMaintenanceScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            // Elegant Light Theme Tool Header Row
-            Row(
+            // Elegant Wood Theme Tool Banner/Header Bar (with NO arrow closes inside standard standalone page tab!)
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(vertical = 12.dp)
+                    .background(titleBarColor, shape = RoundedCornerShape(12.dp))
+                    .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
+                    .padding(vertical = 12.dp, horizontal = 16.dp)
             ) {
-                // Back Arrow Navigation to Web Interface
-                IconButton(
-                    onClick = onReturnClick,
-                    modifier = Modifier.size(36.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Return to Game Page",
-                        tint = textPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Gold Star badge icon
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(Color(0xFFFEF08A), shape = RoundedCornerShape(10.dp)), // Soft gold yellow-200
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Raid Reload Star Icon",
-                        tint = Color(0xFFCA8A04), // Darker yellow-600 gold accent
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // Title details
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = "Raid Reload",
-                        color = textPrimary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Simulation Shield Helper",
-                        color = textSecondary,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                // Ready Badge Status
-                Box(
-                    modifier = Modifier
-                        .background(greenSuccessLight, shape = RoundedCornerShape(50))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    // Gold Star Badge Icon
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(Color(0xFFFEF08A), shape = RoundedCornerShape(8.dp))
+                            .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(8.dp)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .background(greenSuccess, shape = RoundedCornerShape(percent = 50))
-                        )
-                        Text(
-                            text = "Ready",
-                            color = Color(0xFF065F46), // Green-800
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Raid Reload Star Icon",
+                            tint = Color(0xFFCA8A04),
+                            modifier = Modifier.size(20.dp)
                         )
                     }
-                }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                // Minimal Setup Settings
-                IconButton(
-                    onClick = {
-                        val vpnIntent = android.net.VpnService.prepare(context)
-                        if (vpnIntent != null) {
-                            vpnLauncher.launch(vpnIntent!!)
-                        } else {
-                            Toast.makeText(context, "VPN already configured & authenticated.", Toast.LENGTH_SHORT).show()
+                    // Title fields
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "RAID RELOAD TOOL",
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "Simulation Shield Helper",
+                            color = Color(0xFFD4D4D8),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+
+                    // Green Ready Badge status tag
+                    Box(
+                        modifier = Modifier
+                            .background(Color(0xFFECFDF5), shape = RoundedCornerShape(50))
+                            .border(width = 1.dp, color = Color(0xFF34D399), shape = RoundedCornerShape(50))
+                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(Color(0xFF10B981), shape = RoundedCornerShape(percent = 50))
+                            )
+                            Text(
+                                text = "READY",
+                                color = Color(0xFF065F46),
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Black
+                            )
                         }
-                    },
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Setup Context",
-                        tint = textSecondary
-                    )
+                    }
                 }
             }
 
@@ -1192,15 +1326,15 @@ fun RaidReloadMaintenanceScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(cardBg, shape = RoundedCornerShape(12.dp))
-                        .border(width = 1.dp, color = cardBorder, shape = RoundedCornerShape(12.dp))
+                        .background(parchmentBg, shape = RoundedCornerShape(12.dp))
+                        .border(width = 2.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
                         .padding(16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Shield custom icon
+                        // Shield custom icon beautifully styled
                         ClashShieldIconView(
                             modifier = Modifier
                                 .size(56.dp)
@@ -1213,16 +1347,17 @@ fun RaidReloadMaintenanceScreen(
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Raid Connection Tool",
+                                text = "Raid Connection Shield",
                                 color = textPrimary,
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Black
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "A selective 1-second network cutoff engine customized strictly for Clash of Clans, and no other apps.",
+                                text = "A selective 1-second network cutoff engine customized for training, strictly for Clash of Clans simulation runs.",
                                 color = textSecondary,
                                 fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
                                 lineHeight = 16.sp
                             )
                         }
@@ -1233,25 +1368,26 @@ fun RaidReloadMaintenanceScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(cardBg, shape = RoundedCornerShape(12.dp))
-                        .border(width = 1.dp, color = cardBorder, shape = RoundedCornerShape(12.dp))
+                        .background(parchmentBg, shape = RoundedCornerShape(12.dp))
+                        .border(width = 2.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
                         .padding(16.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Light background play indicator icon capsule
+                        // Yellow gold play indicator badge
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(indigoLight, shape = RoundedCornerShape(percent = 50)),
+                                .background(Color(0xFFFEF08A), shape = RoundedCornerShape(percent = 50))
+                                .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(percent = 50)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = "Enable Toggle",
-                                tint = indigoPrimary,
+                                tint = Color(0xFFCA8A04),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -1265,22 +1401,23 @@ fun RaidReloadMaintenanceScreen(
                                 text = "Floating Battle Shield",
                                 color = textPrimary,
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Black
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Turn on to show floating reload button",
+                                text = "Show floating simulation reload button on your screen",
                                 color = textSecondary,
-                                fontSize = 12.sp
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
                             )
                         }
 
-                        // Switch Button Custom style
+                        // Switch Button Custom style (Green/Red themed switch)
                         Switch(
                             checked = isShieldEnabled,
                             onCheckedChange = { checked ->
                                 if (checked && !hasOverlayPermissionState) {
-                                    Toast.makeText(context, "System drawing overlay permission is required. Click 'Setup Settings' to authorize.", Toast.LENGTH_LONG).show()
+                                    Toast.makeText(context, "System drawing overlay permission is required. Click 'Setup Settings' below.", Toast.LENGTH_LONG).show()
                                     return@Switch
                                 }
 
@@ -1300,9 +1437,9 @@ fun RaidReloadMaintenanceScreen(
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
-                                checkedTrackColor = indigoPrimary,
-                                uncheckedThumbColor = Color(0xFF64748B),
-                                uncheckedTrackColor = Color(0xFFE2E8F0)
+                                checkedTrackColor = cocGreen,
+                                uncheckedThumbColor = Color(0xFF8F8E86),
+                                uncheckedTrackColor = Color(0xFFC7C5BD)
                             )
                         )
                     }
@@ -1313,16 +1450,16 @@ fun RaidReloadMaintenanceScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(cardBorder)
+                            .background(borderCharcoal.copy(alpha = 0.2f))
                     )
                     Spacer(modifier = Modifier.height(14.dp))
 
                     // Title header sub-options
                     Text(
-                        text = "Compact Shield Options",
-                        color = Color(0xFF6366F1), // Modern non-vibrant theme color
+                        text = "COMPACT SHIELD OPTIONS",
+                        color = Color(0xFFB45309),
                         fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         letterSpacing = 0.5.sp
                     )
 
@@ -1337,45 +1474,40 @@ fun RaidReloadMaintenanceScreen(
                             text = "Shield Button Size",
                             color = textPrimary,
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = "${shieldSize.toInt()} dp",
-                            color = indigoPrimary,
+                            color = Color(0xFFB45309),
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Black
                         )
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Slider(
-                            value = shieldSize,
-                            onValueChange = { size ->
-                                shieldSize = size
-                                RaidReloadSettings.saveShieldSize(context, size.toInt())
-                                FloatingShieldService.buttonSizeDp = size.toInt()
-                                if (isShieldEnabled && FloatingShieldService.isServiceRunning) {
-                                    val updateIntent = Intent(context, FloatingShieldService::class.java).apply {
-                                        action = "UPDATE_STYLE"
-                                    }
-                                    context.startService(updateIntent)
+                    Slider(
+                        value = shieldSize,
+                        onValueChange = { size ->
+                            shieldSize = size
+                            RaidReloadSettings.saveShieldSize(context, size.toInt())
+                            FloatingShieldService.buttonSizeDp = size.toInt()
+                            if (isShieldEnabled && FloatingShieldService.isServiceRunning) {
+                                val updateIntent = Intent(context, FloatingShieldService::class.java).apply {
+                                    action = "UPDATE_STYLE"
                                 }
-                            },
-                            valueRange = 40f..96f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = indigoPrimary,
-                                activeTrackColor = Color(0xFF818CF8),
-                                inactiveTrackColor = cardBorder
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                                context.startService(updateIntent)
+                            }
+                        },
+                        valueRange = 40f..96f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color(0xFFCA8A04),
+                            activeTrackColor = Color(0xFFFEF08A),
+                            inactiveTrackColor = Color(0xFFC7C5BD)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -1388,45 +1520,40 @@ fun RaidReloadMaintenanceScreen(
                             text = "Shield Idle Transparency",
                             color = textPrimary,
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.Bold,
                             modifier = Modifier.weight(1f)
                         )
                         Text(
                             text = "${shieldTransparency.toInt()}%",
-                            color = indigoPrimary,
+                            color = Color(0xFFB45309),
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Black
                         )
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Slider(
-                            value = shieldTransparency,
-                            onValueChange = { alph ->
-                                shieldTransparency = alph
-                                RaidReloadSettings.saveShieldTransparency(context, alph.toInt())
-                                FloatingShieldService.idleTransparencyPercent = alph.toInt()
-                                if (isShieldEnabled && FloatingShieldService.isServiceRunning) {
-                                    val updateIntent = Intent(context, FloatingShieldService::class.java).apply {
-                                        action = "UPDATE_STYLE"
-                                    }
-                                    context.startService(updateIntent)
+                    Slider(
+                        value = shieldTransparency,
+                        onValueChange = { alph ->
+                            shieldTransparency = alph
+                            RaidReloadSettings.saveShieldTransparency(context, alph.toInt())
+                            FloatingShieldService.idleTransparencyPercent = alph.toInt()
+                            if (isShieldEnabled && FloatingShieldService.isServiceRunning) {
+                                val updateIntent = Intent(context, FloatingShieldService::class.java).apply {
+                                    action = "UPDATE_STYLE"
                                 }
-                            },
-                            valueRange = 20f..100f,
-                            colors = SliderDefaults.colors(
-                                thumbColor = indigoPrimary,
-                                activeTrackColor = Color(0xFF818CF8),
-                                inactiveTrackColor = cardBorder
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
+                                context.startService(updateIntent)
+                            }
+                        },
+                        valueRange = 20f..100f,
+                        colors = SliderDefaults.colors(
+                            thumbColor = Color(0xFFCA8A04),
+                            activeTrackColor = Color(0xFFFEF08A),
+                            inactiveTrackColor = Color(0xFFC7C5BD)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -1435,8 +1562,8 @@ fun RaidReloadMaintenanceScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        // Center Position Button
-                        OutlinedButton(
+                        // Center Position Button (Gray 3D Button)
+                        Clash3DButton(
                             onClick = {
                                 if (isShieldEnabled) {
                                     // Restart service to reset to default position
@@ -1450,50 +1577,49 @@ fun RaidReloadMaintenanceScreen(
                                 }
                             },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
-                            border = BorderStroke(1.dp, cardBorder),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = textPrimary)
+                            baseColor = Color(0xFFC7C5BD),
+                            shadowColor = Color(0xFF8F8E86),
+                            borderColor = borderCharcoal,
+                            contentPadding = PaddingValues(vertical = 10.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = "Center Symbol",
+                                tint = textPrimary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Center Position",
+                                color = textPrimary,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Black
                             )
                         }
 
-                        // Setup Settings Button
-                        Button(
+                        // Setup Settings Button (Yellow 3D Button popping 2 actions dialog)
+                        Clash3DButton(
                             onClick = {
-                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-                                    val intent = Intent(
-                                        android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                                        Uri.parse("package:${context.packageName}")
-                                    )
-                                    launcher.launch(intent)
-                                } else {
-                                    Toast.makeText(context, "Overlay permission is granted by default on your system.", Toast.LENGTH_SHORT).show()
-                                }
+                                showSetupOptionsDialog = true
                             },
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = indigoLight, contentColor = indigoPrimary)
+                            baseColor = Color(0xFFF3C32B),
+                            shadowColor = Color(0xFFB08C15),
+                            borderColor = borderCharcoal,
+                            contentPadding = PaddingValues(vertical = 10.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Build,
                                 contentDescription = "Build Symbol",
+                                tint = Color(0xFF4A3403),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Setup Settings",
+                                color = Color(0xFF4A3403),
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Black
                             )
                         }
                     }
@@ -1503,8 +1629,8 @@ fun RaidReloadMaintenanceScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(cardBg, shape = RoundedCornerShape(12.dp))
-                        .border(width = 1.dp, color = cardBorder, shape = RoundedCornerShape(12.dp))
+                        .background(parchmentBg, shape = RoundedCornerShape(12.dp))
+                        .border(width = 2.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -1512,7 +1638,7 @@ fun RaidReloadMaintenanceScreen(
                         text = "Instant Duel Cutoff Tester",
                         color = textPrimary,
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.Black,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -1520,9 +1646,10 @@ fun RaidReloadMaintenanceScreen(
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Test out the 1-second restabilization shield logic instantly inside the app here below.",
+                        text = "Test the 1-second restabilization shield logic instantly inside the app below.",
                         color = textSecondary,
                         fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Start,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -1543,12 +1670,12 @@ fun RaidReloadMaintenanceScreen(
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             // Circular track
                             drawCircle(
-                                color = cardBorder,
+                                color = Color(0xFFE2E8F0),
                                 style = Stroke(width = 8.dp.toPx())
                             )
                             // Animated angle track
                             drawArc(
-                                color = if (RaidReloadManager.isCutoffActive) Color(0xFFEF4444) else indigoPrimary,
+                                color = if (RaidReloadManager.isCutoffActive) Color(0xFFDC2626) else Color(0xFF9C5FEB),
                                 startAngle = -90f,
                                 sweepAngle = angle,
                                 useCenter = false,
@@ -1561,15 +1688,15 @@ fun RaidReloadMaintenanceScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = String.format("%.1fs", RaidReloadManager.countdownRemaining),
-                                    color = Color(0xFFEF4444),
+                                    color = Color(0xFFDC2626),
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Black
                                 )
                                 Text(
                                     text = "Active",
-                                    color = Color(0xFFEF4444),
+                                    color = Color(0xFFDC2626),
                                     fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Black
                                 )
                             }
                         } else {
@@ -1580,7 +1707,7 @@ fun RaidReloadMaintenanceScreen(
                                 Icon(
                                     imageVector = Icons.Default.Refresh,
                                     contentDescription = "Test Trigger",
-                                    tint = indigoPrimary,
+                                    tint = Color(0xFF9C5FEB),
                                     modifier = Modifier.size(36.dp)
                                 )
                             }
@@ -1589,23 +1716,25 @@ fun RaidReloadMaintenanceScreen(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Large dynamic Action testing button
-                    Button(
+                    // Testing Action Re-connect Shield button (3D Styled)
+                    val testBtnBase = if (RaidReloadManager.isCutoffActive) Color(0xFFDC2626) else Color(0xFF9C5FEB)
+                    val testBtnShadow = if (RaidReloadManager.isCutoffActive) Color(0xFF991B1B) else Color(0xFF642FA8)
+                    Clash3DButton(
                         onClick = { RaidReloadManager.triggerCutoff(context) },
                         enabled = !RaidReloadManager.isCutoffActive,
                         modifier = Modifier
                             .fillMaxWidth(0.9f)
-                            .height(48.dp),
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (RaidReloadManager.isCutoffActive) Color(0xFFEF4444) else Color(0xFF0F172A),
-                            contentColor = Color.White
-                        )
+                            .height(52.dp),
+                        baseColor = testBtnBase,
+                        shadowColor = testBtnShadow,
+                        borderColor = borderCharcoal,
+                        contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
                         Text(
-                            text = if (RaidReloadManager.isCutoffActive) "SHIELD ACTIVE (1s)" else "TEST RE-CONNECT SHIELD (1s)",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
+                            text = if (RaidReloadManager.isCutoffActive) "SHIELD ACTIVE (1S)" else "TEST RE-CONNECT SHIELD (1S)",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black,
                             letterSpacing = 0.5.sp
                         )
                     }

@@ -23,6 +23,8 @@ import com.example.network.ConnectionCutoffVpnService
 class FloatingShieldService : Service() {
     private lateinit var windowManager: WindowManager
     private var floatingView: View? = null
+    private var scaleXAnimator: android.animation.ObjectAnimator? = null
+    private var scaleYAnimator: android.animation.ObjectAnimator? = null
 
     companion object {
         var isServiceRunning = false
@@ -54,19 +56,19 @@ class FloatingShieldService : Service() {
             imageAlpha = 220
             // Set standard refresh/sync icon
             setImageResource(android.R.drawable.ic_popup_sync)
+            setColorFilter(AndroidColor.parseColor("#3C2414")) // Leather brown icon tint
             
-            // Clean, non-vibrant light theme design
-            // Off-white sleek circular design with subtle light gray border
+            // Gold gaming themed border styles
             val defaultShape = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(AndroidColor.parseColor("#F1F5F9")) // Slate-50 background tint
-                setStroke(4, AndroidColor.parseColor("#CBD5E1")) // Slate-300 light border
+                setColor(AndroidColor.parseColor("#F3C32B")) // Clash Gold Background
+                setStroke(6, AndroidColor.parseColor("#423C35")) // Deep wood charcoal border
             }
 
             val pressedShape = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(AndroidColor.parseColor("#E2E8F0")) // Slate-200 background tint
-                setStroke(4, AndroidColor.parseColor("#94A3B8")) // Slate-400 border
+                setColor(AndroidColor.parseColor("#B08C15")) // Pressed Darker Gold
+                setStroke(6, AndroidColor.parseColor("#423C35"))
             }
 
             background = StateListDrawable().apply {
@@ -80,6 +82,22 @@ class FloatingShieldService : Service() {
             
             // Set initial alpha based on user's transparency preference
             alpha = (idleTransparencyPercent / 100f).coerceIn(0.15f, 1f)
+        }
+
+        // Continuous gentle pulsing/breathing animation for visual dynamism
+        scaleXAnimator = android.animation.ObjectAnimator.ofFloat(floatButton, "scaleX", 1.0f, 1.08f, 1.0f).apply {
+            duration = 1800
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.RESTART
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            start()
+        }
+        scaleYAnimator = android.animation.ObjectAnimator.ofFloat(floatButton, "scaleY", 1.0f, 1.08f, 1.0f).apply {
+            duration = 1800
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            repeatMode = android.animation.ValueAnimator.RESTART
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+            start()
         }
 
         val density = resources.displayMetrics.density
@@ -217,6 +235,10 @@ class FloatingShieldService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         isServiceRunning = false
+        scaleXAnimator?.cancel()
+        scaleYAnimator?.cancel()
+        scaleXAnimator = null
+        scaleYAnimator = null
         floatingView?.let {
             try {
                 windowManager.removeView(it)

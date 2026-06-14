@@ -1,7 +1,7 @@
 {
-  "versionCode": 11,
-  "versionName": "1.5",
-  "changeLog": "Configured dynamic Base64 decoder at Gradle configuration-time to restore authentic, persistent debug.keystore, certifying identical and valid signatures across all builds.",
+  "versionCode": 13,
+  "versionName": "1.6",
+  "changeLog": "Polished the Raid Reload interface to match the warm Clash-of-Clans webview theme with custom 3D buttons. Redesigned the screen to act as a standalone tab by removing the return arrow and merging floating overlay menu and VPN configurations into a unified 'Setup Settings' button with a modern overlay permission choice Dialog. Configured a continuous smooth breathing/pulsing animation loop for the golden floating screen-border button.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
   "forceUpdate": true
 }
