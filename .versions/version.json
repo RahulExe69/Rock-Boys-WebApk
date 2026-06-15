@@ -1,7 +1,7 @@
 {
-  "versionCode": 21,
-  "versionName": "1.6.4",
-  "changeLog": "Configured automated GitHub Actions CI/CD release workflow for building APKs and synchronized version.json updater.",
+  "versionCode": 23,
+  "versionName": "1.6.5",
+  "changeLog": "Configured and provisioned standard Gradle wrapper scripts to fix GitHub Actions CI/CD build execution.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
