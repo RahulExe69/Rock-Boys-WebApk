@@ -1,7 +1,7 @@
 {
-  "versionCode": 29,
-  "versionName": "1.6.8",
-  "changeLog": "build: update to version 1.6.8 and optimize keystore injection\n\nEmbed the base64 signing keystore directly into the CI/CD workflow to\nsimplify the build process and eliminate reliance on external file\ndependencies for release signing.",
+  "versionCode": 31,
+  "versionName": "1.6.9",
+  "changeLog": "Updated the Raid Reload floating icon to load the APK launcher icon with no idle pulsing animation, added a 360-degree spin animation on click, and updated help information to clarify the tool purpose for Clash of Clans Raid attacks.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

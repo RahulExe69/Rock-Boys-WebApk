@@ -53,51 +53,16 @@ class FloatingShieldService : Service() {
 
         val context = this
         val floatButton = ImageView(context).apply {
-            imageAlpha = 220
-            // Set standard refresh/sync icon
-            setImageResource(android.R.drawable.ic_popup_sync)
-            setColorFilter(AndroidColor.parseColor("#381504")) // Leather brown icon tint
-            
-            // Gold gaming themed border styles
-            val defaultShape = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(AndroidColor.parseColor("#FDBC11")) // Clash Gold Background
-                setStroke(6, AndroidColor.parseColor("#381504")) // Dark leather brown border
+            try {
+                val appIcon = context.packageManager.getApplicationIcon(context.packageName)
+                setImageDrawable(appIcon)
+            } catch (e: Exception) {
+                setImageResource(android.R.drawable.ic_popup_sync)
             }
-
-            val pressedShape = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(AndroidColor.parseColor("#B37306")) // Pressed Darker Gold
-                setStroke(6, AndroidColor.parseColor("#381504"))
-            }
-
-            background = StateListDrawable().apply {
-                addState(intArrayOf(android.R.attr.state_pressed), pressedShape)
-                addState(intArrayOf(), defaultShape)
-            }
-
-            scaleType = ImageView.ScaleType.CENTER_INSIDE
-            val pad = (12 * resources.displayMetrics.density).toInt()
-            setPadding(pad, pad, pad, pad)
+            scaleType = ImageView.ScaleType.FIT_CENTER
             
             // Set initial alpha based on user's transparency preference
             alpha = (idleTransparencyPercent / 100f).coerceIn(0.15f, 1f)
-        }
-
-        // Continuous gentle pulsing/breathing animation for visual dynamism
-        scaleXAnimator = android.animation.ObjectAnimator.ofFloat(floatButton, "scaleX", 1.0f, 1.08f, 1.0f).apply {
-            duration = 1800
-            repeatCount = android.animation.ValueAnimator.INFINITE
-            repeatMode = android.animation.ValueAnimator.RESTART
-            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
-            start()
-        }
-        scaleYAnimator = android.animation.ObjectAnimator.ofFloat(floatButton, "scaleY", 1.0f, 1.08f, 1.0f).apply {
-            duration = 1800
-            repeatCount = android.animation.ValueAnimator.INFINITE
-            repeatMode = android.animation.ValueAnimator.RESTART
-            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
-            start()
         }
 
         val density = resources.displayMetrics.density
@@ -205,6 +170,15 @@ class FloatingShieldService : Service() {
     }
 
     private fun triggerCutoffAction() {
+        val imageView = floatingView as? ImageView
+        if (imageView != null) {
+            android.animation.ObjectAnimator.ofFloat(imageView, "rotation", 0f, 360f).apply {
+                duration = 1000
+                interpolator = android.view.animation.DecelerateInterpolator()
+                start()
+            }
+        }
+
         // Run the cutoff globally inside manager
         onCutoffTriggered?.invoke()
 
@@ -217,7 +191,7 @@ class FloatingShieldService : Service() {
             // Background permission error handle
         }
 
-        Toast.makeText(this, "CoC Shield: Network Interrupted!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Raid Reload: 1s Network Interruption!", Toast.LENGTH_SHORT).show()
 
         // Schedule exact 1.0s stop
         Handler(Looper.getMainLooper()).postDelayed({

@@ -1419,14 +1419,14 @@ fun RaidReloadMaintenanceScreen() {
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Raid Connection Shield",
+                                text = "What is Raid Reload?",
                                 color = textPrimary,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Black
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "A selective 1-second network cutoff engine customized for training, strictly for Clash of Clans simulation runs.",
+                                text = "During Clan Capital Raid attacks, players often force-close and restart Clash of Clans to skip the long attack animation and save time. Raid Reload makes this instant! Instead of manually closing and restarting the game, this tool safely cuts the internet for exactly 1 second, causing the game to immediately reload itself directly back in without any app-switching.",
                                 color = textSecondary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
@@ -1707,7 +1707,7 @@ fun RaidReloadMaintenanceScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Instant Duel Cutoff Tester",
+                        text = "Interactive Raid Reload Tester",
                         color = textPrimary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Black,
@@ -1718,7 +1718,7 @@ fun RaidReloadMaintenanceScreen() {
                     Spacer(modifier = Modifier.height(4.dp))
 
                     Text(
-                        text = "Test the 1-second restabilization shield logic instantly inside the app below.",
+                        text = "Quickly test the 1-second network reload trigger directly inside the app below.",
                         color = textSecondary,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
@@ -1803,7 +1803,7 @@ fun RaidReloadMaintenanceScreen() {
                         contentPadding = PaddingValues(vertical = 12.dp)
                     ) {
                         Text(
-                            text = if (RaidReloadManager.isCutoffActive) "SHIELD ACTIVE (1S)" else "TEST RE-CONNECT SHIELD (1S)",
+                            text = if (RaidReloadManager.isCutoffActive) "RELOADING... (1S)" else "TRIGGER 1S RAID RELOAD",
                             color = Color.White,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black,
