@@ -21,6 +21,13 @@ data class UpdateInfo(
 
 object UpdateChecker {
     private const val TAG = "UpdateChecker"
+    
+    // Toggle between GitHub update-file hosting or Google Drive update-file hosting
+    const val USE_GOOGLE_DRIVE = false
+    
+    // Google Drive File ID for 'version.json' (make sure file is shared as 'Anyone with link can view')
+    const val GOOGLE_DRIVE_VERSION_FILE_ID = "1A_2B_3C_Replace_With_Your_Google_Drive_File_ID_Here"
+
     private const val UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/version.json"
     private val client = OkHttpClient()
 
@@ -48,9 +55,14 @@ object UpdateChecker {
     }
 
     suspend fun checkForUpdates(): UpdateInfo? {
-        val cacheBustingUrl = "$UPDATE_URL?t=${System.currentTimeMillis()}"
+        val targetUrl = if (USE_GOOGLE_DRIVE) {
+            "https://docs.google.com/uc?export=download&id=$GOOGLE_DRIVE_VERSION_FILE_ID"
+        } else {
+            "$UPDATE_URL?t=${System.currentTimeMillis()}"
+        }
+        
         val request = Request.Builder()
-            .url(cacheBustingUrl)
+            .url(targetUrl)
             .header("Cache-Control", "no-cache")
             .build()
 
