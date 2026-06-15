@@ -36,8 +36,8 @@ android {
     applicationId = "com.rockboys.exe"
     minSdk = 24
     targetSdk = 36
-    versionCode = 17
-    versionName = "1.6.2"
+    versionCode = 21
+    versionName = "1.6.4"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -166,24 +166,16 @@ abstract class CopyApkTask : DefaultTask() {
             val apkFiles = apkDir.walkTopDown().filter { it.isFile && it.name.endsWith(".apk") }
             for (file in apkFiles) {
                 val isRelease = file.name.contains("release", ignoreCase = true) || file.parentFile.name.contains("release", ignoreCase = true)
-                val targetName = if (isRelease) "app-release.apk" else "app-debug.apk"
-
-                // 1. HIDDEN PATH
-                val dest1 = File(outDir, ".build-outputs/$targetName")
-                dest1.parentFile.mkdirs()
-                file.copyTo(dest1, overwrite = true)
-                println("Successfully copied APK to compiler output directory: ${dest1.absolutePath}")
-
-                // 2. VISIBLE PATH
-                val dest2 = File(outDir, "build-outputs/$targetName")
-                dest2.parentFile.mkdirs()
-                file.copyTo(dest2, overwrite = true)
-                println("Successfully copied APK to visible output directory: ${dest2.absolutePath}")
-
-                // 3. PROJECT ROOT PATH
-                val dest3 = File(outDir, targetName)
-                file.copyTo(dest3, overwrite = true)
-                println("Successfully copied APK directly to project root: ${dest3.absolutePath}")
+                
+                // Copy compiled APK to both app-debug.apk and app-release.apk inside .build-outputs
+                val targets = if (isRelease) listOf("app-release.apk") else listOf("app-debug.apk", "app-release.apk")
+                
+                for (targetName in targets) {
+                    val dest = File(outDir, ".build-outputs/$targetName")
+                    dest.parentFile.mkdirs()
+                    file.copyTo(dest, overwrite = true)
+                    println("Successfully copied APK to compiler output directory: ${dest.absolutePath}")
+                }
             }
         }
     }

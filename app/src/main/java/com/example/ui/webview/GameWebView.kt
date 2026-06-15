@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.WindowCompat
 import com.example.MainActivity
+import com.example.R
 import com.example.WebAppInterface
 import com.example.ui.theme.CyberBlack
 import com.example.ui.theme.CyberDark
@@ -568,7 +569,7 @@ fun GameWebView(
 
 
 
-            // Beautiful Gaming Offline Retry Screen Overlay
+            // Beautiful Gaming Offline Retry Screen Overlay (Clash of Clans style)
             AnimatedVisibility(
                 visible = hasError,
                 enter = fadeIn() + expandVertically(),
@@ -577,60 +578,73 @@ fun GameWebView(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(CyberBlack),
+                        .background(Color(0xFF150B09)), // Safe warm dark brown fallback
                     contentAlignment = Alignment.Center
                 ) {
+                    // Try to render the provided background image
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.no_network_background),
+                        contentDescription = "No Network Background",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                    
+                    // Darken background overlay
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.15f))
+                    )
+
+                    // Authentically styled CoC Connection Error Card
                     Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center,
                         modifier = Modifier
                             .padding(32.dp)
-                            .background(CyberDark, shape = RoundedCornerShape(16.dp))
-                            .border(width = 1.dp, color = LaserRed.copy(alpha = 0.5f), shape = RoundedCornerShape(16.dp))
-                            .padding(24.dp)
+                            .fillMaxWidth(0.88f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xFF231512)) // Dark warm chocolate brown box
+                            .border(BorderStroke(1.5.dp, Color(0xFF110705)), RoundedCornerShape(8.dp))
+                            .padding(start = 28.dp, end = 28.dp, top = 28.dp, bottom = 24.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Disconnection Warning",
-                            tint = LaserRed,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
                         Text(
-                            text = "ESTABLISHING CONNECTION FAILED",
-                            color = TextColorLaserRed,
-                            fontSize = 16.sp,
+                            text = "Connection error",
+                            color = Color.White,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            letterSpacing = 1.sp
+                            letterSpacing = (-0.3).sp,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
                         )
                         
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         
                         Text(
-                            text = "We are unable to communicate with RockBoys servers. Please verify that your system is online.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 13.sp,
-                            textAlign = TextAlign.Center
+                            text = "Unable to connect with the server. Check your internet connection and try again.",
+                            color = Color(0xFFDFD1C4), // Sand beige parchment color
+                            fontSize = 16.sp,
+                            lineHeight = 22.sp,
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
                         )
                         
-                        Spacer(modifier = Modifier.height(24.dp))
+                        Spacer(modifier = Modifier.height(28.dp))
                         
-                        Button(
-                            onClick = {
-                                hasError = false
-                                isPageLoading = true
-                                webViewInstance?.reload()
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = LaserRed),
-                            shape = RoundedCornerShape(8.dp)
+                        // Try Again click area exactly as in-game design
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable {
+                                    hasError = false
+                                    isPageLoading = true
+                                    webViewInstance?.reload()
+                                }
+                                .padding(vertical = 12.dp, horizontal = 12.dp)
+                                .offset(x = (-12).dp)
                         ) {
                             Text(
-                                text = "RETRY SENSORS",
+                                text = "Try again",
                                 color = Color.White,
-                                fontWeight = FontWeight.Bold
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
                             )
                         }
                     }
@@ -693,52 +707,110 @@ fun GameWebView(
                 }
             }
 
-            // High-fidelity Gaming Exit Confirmation Overlay
+            // CoC Immerse Wood-board style Exit Confirmation Dialogue
             if (showExitDialog) {
-                AlertDialog(
-                    onDismissRequest = { showExitDialog = false },
-                    title = {
-                        Text(
-                            text = "EXIT PORTAL?",
-                            color = ToxicGreen,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
-                    },
-                    text = {
-                        Text(
-                            text = "Are you sure you want to disconnect and exit the RockBoys application?",
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 14.sp
-                        )
-                    },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                showExitDialog = false
-                                onExitRequested()
-                            }
+                androidx.compose.ui.window.Dialog(
+                    onDismissRequest = { showExitDialog = false }
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color(0xFF2C1B12)) // Deep carved wood brown
+                            .border(BorderStroke(3.dp, Color(0xFFC79E61)), RoundedCornerShape(16.dp)) // pine frame
+                            .border(BorderStroke(1.dp, Color(0xFF150B05)), RoundedCornerShape(16.dp)) // outline
+                            .padding(20.dp)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ExitToApp,
+                                    contentDescription = "Exit Icon",
+                                    tint = Color(0xFFE4B359),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "QUIT BATTLE?",
+                                    color = Color(0xFFEAD8C3), // Honey cream/gold title
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 0.5.sp,
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Serif
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             Text(
-                                text = "DISCONNECT",
-                                color = LaserRed,
-                                fontWeight = FontWeight.Bold
+                                text = "Are you sure you want to disconnect and exit back to the home screen?",
+                                color = Color(0xFFDFD1C4), // Parchment beige helper
+                                fontSize = 15.sp,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 20.sp,
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.SansSerif
                             )
+
+                            Spacer(modifier = Modifier.height(24.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // NO / CANCEL Button (styled like a Clash of Clans green button)
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(end = 8.dp)
+                                        .height(44.dp)
+                                        .background(Color(0xFF4A8F24), shape = RoundedCornerShape(8.dp))
+                                        .border(BorderStroke(2.dp, Color(0xFF1A440D)), shape = RoundedCornerShape(8.dp))
+                                        .clickable { showExitDialog = false },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "PLAY ON",
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
+
+                                // YES / EXIT Button (styled like a Clash of Clans red button)
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 8.dp)
+                                        .height(44.dp)
+                                        .background(Color(0xFFC13E2E), shape = RoundedCornerShape(8.dp))
+                                        .border(BorderStroke(2.dp, Color(0xFF55100A)), shape = RoundedCornerShape(8.dp))
+                                        .clickable {
+                                            showExitDialog = false
+                                            onExitRequested()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "DISCONNECT",
+                                        color = Color.White,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.5.sp
+                                    )
+                                }
+                            }
                         }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showExitDialog = false }) {
-                            Text(
-                                text = "CANCEL",
-                                color = CyberCyan,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                    },
-                    containerColor = CyberDark,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.border(width = 1.dp, color = CyberLine, shape = RoundedCornerShape(12.dp))
-                )
+                    }
+                }
             }
         }
     }

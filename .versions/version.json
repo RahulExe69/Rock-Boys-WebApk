@@ -1,7 +1,7 @@
 {
-  "versionCode": 17,
-  "versionName": "1.6.2",
-  "changeLog": "Cleaned up build assets to deliver a fully compiled, genuine native APK. Added Toggle support in the network configurations to smoothly choose between GitHub and Google Drive binary distribution, with the user's preferred automated GitHub flow set by default.",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
+  "versionCode": 21,
+  "versionName": "1.6.4",
+  "changeLog": "Configured automated GitHub Actions CI/CD release workflow for building APKs and synchronized version.json updater.",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

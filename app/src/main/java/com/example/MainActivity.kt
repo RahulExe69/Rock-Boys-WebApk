@@ -40,9 +40,8 @@ class MainActivity : ComponentActivity() {
         
         networkMonitor = NetworkMonitor(applicationContext)
 
-        // Monitor network state dynamically to spawn native toast notifications
+        // Monitor network state dynamically
         lifecycleScope.launch {
-            var firstCollect = true
             networkMonitor.isConnected.collectLatest { isConnected ->
                 if (!isConnected) {
                     Toast.makeText(
@@ -50,14 +49,7 @@ class MainActivity : ComponentActivity() {
                         "Internet Connection Lost. Core sectors operating on cache.",
                         Toast.LENGTH_LONG
                     ).show()
-                } else if (!firstCollect) {
-                    Toast.makeText(
-                        applicationContext,
-                        "Connection Restored. Sensors Online.",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
-                firstCollect = false
             }
         }
 
