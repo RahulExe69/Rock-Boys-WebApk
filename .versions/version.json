@@ -1,7 +1,7 @@
 {
   "versionCode": 29,
   "versionName": "1.6.8",
-  "changeLog": "Embedded base64 signing keystore directly inside the CI/CD workflow script to ensure flawless release signing on GitHub Actions runners without external file dependencies.",
+  "changeLog": "build: update to version 1.6.8 and optimize keystore injection\n\nEmbed the base64 signing keystore directly into the CI/CD workflow to\nsimplify the build process and eliminate reliance on external file\ndependencies for release signing.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
