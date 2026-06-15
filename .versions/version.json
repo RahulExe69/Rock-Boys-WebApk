@@ -1,7 +1,7 @@
 {
   "versionCode": 31,
   "versionName": "1.6.9",
-  "changeLog": "Updated the Raid Reload floating icon to load the APK launcher icon with no idle pulsing animation, added a 360-degree spin animation on click, and updated help information to clarify the tool purpose for Clash of Clans Raid attacks.",
+  "changeLog": "feat: update Raid Reload icon and clarify tool purpose\n\n- Replace floating icon with app launcher icon and add 360-degree spin animation on click\n- Update Raid Reload help information for better clarity on Clash of Clans usage\n- Increment version to 1.6.9",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
