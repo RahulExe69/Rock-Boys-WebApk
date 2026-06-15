@@ -1470,14 +1470,14 @@ fun RaidReloadMaintenanceScreen() {
                             modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                text = "Floating Battle Shield",
+                                text = "Floating Reload Button",
                                 color = textPrimary,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Black
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Show floating simulation reload button on your screen",
+                                text = "Show a floating shortcut icon over the game screen",
                                 color = textSecondary,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold
@@ -1528,7 +1528,7 @@ fun RaidReloadMaintenanceScreen() {
 
                     // Title header sub-options
                     Text(
-                        text = "COMPACT SHIELD OPTIONS",
+                        text = "COMPACT BUTTON OPTIONS",
                         color = Color(0xFF8F4E10),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
@@ -1537,13 +1537,13 @@ fun RaidReloadMaintenanceScreen() {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Option A: Shield Button Size Slider
+                    // Option A: Button Size Slider
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Shield Button Size",
+                            text = "Reload Button Size",
                             color = textPrimary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
@@ -1583,13 +1583,13 @@ fun RaidReloadMaintenanceScreen() {
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Option B: Shield Idle Transparency Slider
+                    // Option B: Button Idle Transparency Slider
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Shield Idle Transparency",
+                            text = "Button Idle Transparency",
                             color = textPrimary,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,

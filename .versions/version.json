@@ -1,7 +1,7 @@
 {
-  "versionCode": 31,
-  "versionName": "1.6.9",
-  "changeLog": "feat: update Raid Reload icon and clarify tool purpose\n\n- Replace floating icon with app launcher icon and add 360-degree spin animation on click\n- Update Raid Reload help information for better clarity on Clash of Clans usage\n- Increment version to 1.6.9",
+  "versionCode": 33,
+  "versionName": "1.7.0",
+  "changeLog": "Enhanced the Raid Reload (RR) tool floating button shape and app icon presentation to be perfectly round, renamed options to be highly intuitive, and engineered an advanced CI/CD release structure utilizing update.json as the single source of truth to bypass any release update race conditions.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

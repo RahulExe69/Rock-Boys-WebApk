@@ -59,7 +59,20 @@ class FloatingShieldService : Service() {
             } catch (e: Exception) {
                 setImageResource(android.R.drawable.ic_popup_sync)
             }
-            scaleType = ImageView.ScaleType.FIT_CENTER
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            
+            // Make both container and the loaded icon perfectly round
+            val circleBG = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(AndroidColor.TRANSPARENT)
+                setStroke(8, AndroidColor.parseColor("#FDBC11")) // Clash Gold Border
+            }
+            background = circleBG
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                outlineProvider = android.view.ViewOutlineProvider.BACKGROUND
+                clipToOutline = true
+            }
             
             // Set initial alpha based on user's transparency preference
             alpha = (idleTransparencyPercent / 100f).coerceIn(0.15f, 1f)

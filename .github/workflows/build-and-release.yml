@@ -83,15 +83,21 @@ jobs:
           version_name = version_name_match.group(1)
           print(f"Extracted values from build.gradle.kts -> Code: {version_code}, Name: {version_name}")
 
-          # 2. Read existing version.json or create if missing
-          version_json_path = '.versions/version.json'
+          # 2. Read existing update.json or version.json or create if missing
+          version_json_path = '.versions/update.json'
           data = {}
           if os.path.exists(version_json_path):
               with open(version_json_path, 'r', encoding='utf-8') as f:
                   try:
                       data = json.load(f)
                   except Exception as e:
-                      print(f"Warning: Failed to load existing version.json: {e}")
+                      pass
+          elif os.path.exists('.versions/version.json'):
+              with open('.versions/version.json', 'r', encoding='utf-8') as f:
+                  try:
+                      data = json.load(f)
+                  except Exception as e:
+                      pass
           
           # 3. Pull the latest git commit message for the release changeLog
           try:
@@ -127,12 +133,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add .versions/version.json .build-outputs/app-release.apk
+          git add .versions/update.json .build-outputs/app-release.apk
           
           # Check if there are changes to commit
           if git diff-index --quiet HEAD --; then
             echo "No build or version metadata updates to commit."
           else
-            git commit -m "Automated build & release: update APK and version.json to v$(python -c "import json; print(json.load(open('.versions/version.json'))['versionName'])") [skip ci]"
+            git commit -m "Automated build & release: update APK and update.json to v$(python -c "import json; print(json.load(open('.versions/update.json'))['versionName'])") [skip ci]"
             git push origin main
           fi
