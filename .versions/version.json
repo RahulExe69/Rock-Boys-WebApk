@@ -1,7 +1,7 @@
 {
-  "versionCode": 25,
-  "versionName": "1.6.6",
-  "changeLog": "Migrated CI/CD release workflow to use the official setup-gradle actions step to safely download and build without corrupting the local wrapper executable.",
+  "versionCode": 27,
+  "versionName": "1.6.7",
+  "changeLog": "Configured dynamic base64 keystore decoder in the GitHub Actions workflow to enable successful release apk signing during automated builds.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
