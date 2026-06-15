@@ -900,7 +900,7 @@ fun ClashShieldIconView(modifier: Modifier = Modifier) {
         }
         drawPath(
             path = path,
-            color = Color(0xFFF3C32B) // Clash Gold
+            color = Color(0xFFFDBC11) // Clash Gold
         )
         drawPath(
             path = path,
@@ -1087,9 +1087,9 @@ fun RaidReloadMaintenanceScreen() {
         FloatingShieldService.idleTransparencyPercent = shieldTransparency.toInt()
     }
 
-    val bgWebsite = Color(0xFFEBE8DF) // Warm beige background matching the website
+    val bgWebsite = Color(0xFFDDD9CD) // Sandy desaturated concrete clay background matching the website screenshot
     val titleBarColor = Color(0xFF423C35) // Deep Slate/Charcoal for headers
-    val parchmentBg = Color(0xFFF6F4EB) // Creamy white container background
+    val parchmentBg = Color(0xFFFAF7EE) // Premium warm parchment card background matching screenshot elements
     val borderCharcoal = Color(0xFF4C473E) // Muted border color
     val textPrimary = Color(0xFF3C342C) // Warm dark brown/charcoal
     val textSecondary = Color(0xFF6B5E52) // Soft medium brown text
@@ -1253,14 +1253,14 @@ fun RaidReloadMaintenanceScreen() {
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .background(Color(0xFFFEF08A), shape = RoundedCornerShape(8.dp))
+                            .background(Color(0xFFFDBC11), shape = RoundedCornerShape(8.dp))
                             .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(8.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Raid Reload Star Icon",
-                            tint = Color(0xFFCA8A04),
+                            tint = Color(0xFF381504),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -1380,14 +1380,14 @@ fun RaidReloadMaintenanceScreen() {
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(Color(0xFFFEF08A), shape = RoundedCornerShape(percent = 50))
+                                .background(Color(0xFFFDBC11), shape = RoundedCornerShape(percent = 50))
                                 .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(percent = 50)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = "Enable Toggle",
-                                tint = Color(0xFFCA8A04),
+                                tint = Color(0xFF381504),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -1457,7 +1457,7 @@ fun RaidReloadMaintenanceScreen() {
                     // Title header sub-options
                     Text(
                         text = "COMPACT SHIELD OPTIONS",
-                        color = Color(0xFFB45309),
+                        color = Color(0xFF8F4E10),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 0.5.sp
@@ -1479,7 +1479,7 @@ fun RaidReloadMaintenanceScreen() {
                         )
                         Text(
                             text = "${shieldSize.toInt()} dp",
-                            color = Color(0xFFB45309),
+                            color = Color(0xFF8F4E10),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black
                         )
@@ -1502,8 +1502,8 @@ fun RaidReloadMaintenanceScreen() {
                         },
                         valueRange = 40f..96f,
                         colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFFCA8A04),
-                            activeTrackColor = Color(0xFFFEF08A),
+                            thumbColor = Color(0xFFFDBC11),
+                            activeTrackColor = Color(0xFFFCDD8F),
                             inactiveTrackColor = Color(0xFFC7C5BD)
                         ),
                         modifier = Modifier.fillMaxWidth()
@@ -1525,7 +1525,7 @@ fun RaidReloadMaintenanceScreen() {
                         )
                         Text(
                             text = "${shieldTransparency.toInt()}%",
-                            color = Color(0xFFB45309),
+                            color = Color(0xFF8F4E10),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Black
                         )
@@ -1548,8 +1548,8 @@ fun RaidReloadMaintenanceScreen() {
                         },
                         valueRange = 20f..100f,
                         colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFFCA8A04),
-                            activeTrackColor = Color(0xFFFEF08A),
+                            thumbColor = Color(0xFFFDBC11),
+                            activeTrackColor = Color(0xFFFCDD8F),
                             inactiveTrackColor = Color(0xFFC7C5BD)
                         ),
                         modifier = Modifier.fillMaxWidth()
@@ -1603,21 +1603,21 @@ fun RaidReloadMaintenanceScreen() {
                                 showSetupOptionsDialog = true
                             },
                             modifier = Modifier.weight(1f),
-                            baseColor = Color(0xFFF3C32B),
-                            shadowColor = Color(0xFFB08C15),
+                            baseColor = Color(0xFFFDBC11),
+                            shadowColor = Color(0xFFB37306),
                             borderColor = borderCharcoal,
                             contentPadding = PaddingValues(vertical = 10.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Build,
                                 contentDescription = "Build Symbol",
-                                tint = Color(0xFF4A3403),
+                                tint = Color(0xFF381504),
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "Setup Settings",
-                                color = Color(0xFF4A3403),
+                                color = Color(0xFF381504),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Black
                             )
@@ -1756,16 +1756,16 @@ fun ForceUpdateScreen(
     downloadError: String?,
     onUpgradeClick: () -> Unit
 ) {
-    val bgWebsite = Color(0xFFEBE8DF) // Warm beige background matching the website
+    val bgWebsite = Color(0xFFDDD9CD) // Sandy desaturated concrete clay background matching the website screenshot
     val titleBarColor = Color(0xFF423C35) // Deep Slate/Charcoal for headers
-    val parchmentBg = Color(0xFFF6F4EB) // Creamy white container background
+    val parchmentBg = Color(0xFFFAF7EE) // Premium warm parchment card background matching screenshot elements
     val borderCharcoal = Color(0xFF4C473E) // Muted border color
     
     // 3D Tab-style Colors
     val tabGrayBase = Color(0xFFC7C5BD)
     val tabGrayShadow = Color(0xFF8F8E86)
-    val tabYellowBase = Color(0xFFF3C32B)
-    val tabYellowShadow = Color(0xFFB08C15)
+    val tabYellowBase = Color(0xFFFDBC11)
+    val tabYellowShadow = Color(0xFFB37306)
     
     // Clash 3D Green Button Colors
     val cocGreen = Color(0xFF4BAC1A)

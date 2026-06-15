@@ -56,19 +56,19 @@ class FloatingShieldService : Service() {
             imageAlpha = 220
             // Set standard refresh/sync icon
             setImageResource(android.R.drawable.ic_popup_sync)
-            setColorFilter(AndroidColor.parseColor("#3C2414")) // Leather brown icon tint
+            setColorFilter(AndroidColor.parseColor("#381504")) // Leather brown icon tint
             
             // Gold gaming themed border styles
             val defaultShape = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(AndroidColor.parseColor("#F3C32B")) // Clash Gold Background
-                setStroke(6, AndroidColor.parseColor("#423C35")) // Deep wood charcoal border
+                setColor(AndroidColor.parseColor("#FDBC11")) // Clash Gold Background
+                setStroke(6, AndroidColor.parseColor("#381504")) // Dark leather brown border
             }
 
             val pressedShape = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(AndroidColor.parseColor("#B08C15")) // Pressed Darker Gold
-                setStroke(6, AndroidColor.parseColor("#423C35"))
+                setColor(AndroidColor.parseColor("#B37306")) // Pressed Darker Gold
+                setStroke(6, AndroidColor.parseColor("#381504"))
             }
 
             background = StateListDrawable().apply {

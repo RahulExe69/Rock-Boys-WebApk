@@ -1,7 +1,7 @@
 {
-  "versionCode": 13,
-  "versionName": "1.6",
-  "changeLog": "Polished the Raid Reload interface to match the warm Clash-of-Clans webview theme with custom 3D buttons. Redesigned the screen to act as a standalone tab by removing the return arrow and merging floating overlay menu and VPN configurations into a unified 'Setup Settings' button with a modern overlay permission choice Dialog. Configured a continuous smooth breathing/pulsing animation loop for the golden floating screen-border button.",
+  "versionCode": 15,
+  "versionName": "1.6.1",
+  "changeLog": "Redesigned the entire application interface to transition from cold pale-yellow accent tones to rich, authentic Clash of Clans honey-gold buttons, stars, and play indicators. Perfectly matched the page background with the web view's warm dusty sandstone-concrete color palette to ensure cohesive visual integrity across all tabs. Polished the animated floating shield button with high-contrast espresso leather brown borders and matching golden-shadow active states.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
   "forceUpdate": true
 }
