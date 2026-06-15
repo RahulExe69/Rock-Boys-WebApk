@@ -1,7 +1,7 @@
 {
-  "versionCode": 27,
-  "versionName": "1.6.7",
-  "changeLog": "Configured dynamic base64 keystore decoder in the GitHub Actions workflow to enable successful release apk signing during automated builds.",
+  "versionCode": 29,
+  "versionName": "1.6.8",
+  "changeLog": "Embedded base64 signing keystore directly inside the CI/CD workflow script to ensure flawless release signing on GitHub Actions runners without external file dependencies.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
