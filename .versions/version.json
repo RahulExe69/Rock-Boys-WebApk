@@ -1,7 +1,7 @@
 {
-  "versionCode": 23,
-  "versionName": "1.6.5",
-  "changeLog": "Configured and provisioned standard Gradle wrapper scripts to fix GitHub Actions CI/CD build execution.",
+  "versionCode": 25,
+  "versionName": "1.6.6",
+  "changeLog": "Migrated CI/CD release workflow to use the official setup-gradle actions step to safely download and build without corrupting the local wrapper executable.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
