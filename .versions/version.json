@@ -1,7 +1,7 @@
 {
-  "versionCode": 15,
-  "versionName": "1.6.1",
-  "changeLog": "Redesigned the entire application interface to transition from cold pale-yellow accent tones to rich, authentic Clash of Clans honey-gold buttons, stars, and play indicators. Perfectly matched the page background with the web view's warm dusty sandstone-concrete color palette to ensure cohesive visual integrity across all tabs. Polished the animated floating shield button with high-contrast espresso leather brown borders and matching golden-shadow active states.",
+  "versionCode": 17,
+  "versionName": "1.6.2",
+  "changeLog": "Cleaned up build assets to deliver a fully compiled, genuine native APK. Added Toggle support in the network configurations to smoothly choose between GitHub and Google Drive binary distribution, with the user's preferred automated GitHub flow set by default.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-debug.apk",
   "forceUpdate": true
 }
