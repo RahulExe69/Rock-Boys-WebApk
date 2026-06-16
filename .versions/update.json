@@ -1,7 +1,0 @@
-{
-  "versionCode": 35,
-  "versionName": "1.7.1",
-  "changeLog": "chore: bump version to 1.7.1\n\n- Update versionCode to 35 and versionName to 1.7.1\n- Improve network toast stability in MainActivity\n- Add missing error handling in GameWebView\n- Reset update metadata",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
-  "forceUpdate": true
-}
