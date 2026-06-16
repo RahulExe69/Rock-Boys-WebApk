@@ -1,7 +1,0 @@
-{
-  "versionCode": 33,
-  "versionName": "1.7.0",
-  "changeLog": "chore: revert version to 1.7.0 and clean codebase\n\n- Roll back version to 1.7.0 (versionCode 33)\n- Simplify network toast implementation in MainActivity\n- Remove redundant error handling in GameWebView\n- Reset update metadata configuration",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
-  "forceUpdate": true
-}
