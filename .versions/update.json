@@ -1,0 +1,7 @@
+{
+  "versionCode": 33,
+  "versionName": "1.7.0",
+  "changeLog": "refactor: downgrade version and clean up codebase\n\n- Revert version to 1.7.0 (code 33)\n- Remove unused imports and logic in MainActivity\n- Simplify NetworkMonitor implementation\n- Remove redundant WebView error handler",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
+  "forceUpdate": true
+}
