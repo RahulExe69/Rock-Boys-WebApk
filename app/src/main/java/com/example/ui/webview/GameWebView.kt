@@ -519,10 +519,18 @@ fun GameWebView(
                                 return false
                             }
 
+                            @Suppress("DEPRECATION")
+                            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+                                hasError = true
+                                isPageLoading = false
+                                onPageLoaded()
+                            }
+
                             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                                 if (request?.isForMainFrame == true) {
                                     hasError = true
                                     isPageLoading = false
+                                    onPageLoaded()
                                 }
                             }
                         }

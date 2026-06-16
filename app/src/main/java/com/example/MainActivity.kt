@@ -44,11 +44,17 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             networkMonitor.isConnected.collectLatest { isConnected ->
                 if (!isConnected) {
-                    Toast.makeText(
-                        applicationContext,
-                        "Internet Connection Lost. Core sectors operating on cache.",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    runOnUiThread {
+                        try {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Internet Connection Lost. Core sectors operating on cache.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } catch (e: Exception) {
+                            // Suppress any unexpected toast exceptions in background lifecycle transitions
+                        }
+                    }
                 }
             }
         }
