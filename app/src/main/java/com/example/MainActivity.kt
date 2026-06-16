@@ -42,9 +42,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             kotlinx.coroutines.delay(1200)
             minimumSplashPassed = true
-            if (!networkMonitor.isCurrentlyConnected()) {
-                isWebViewLoading = false
-            }
             kotlinx.coroutines.delay(1300) // complete the 2.5-second ultimate backup safety timeout
             isWebViewLoading = false
         }

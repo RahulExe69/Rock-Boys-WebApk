@@ -74,13 +74,12 @@ fun GameWebView(
     val context = LocalContext.current
     
     val networkMonitor = remember { NetworkMonitor(context.applicationContext) }
-    val initialConnection = remember { networkMonitor.isCurrentlyConnected() }
     
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-    var isPageLoading by remember { mutableStateOf(initialConnection) }
+    var isPageLoading by remember { mutableStateOf(true) }
     var loadingProgress by remember { mutableStateOf(0f) }
-    var hasError by remember { mutableStateOf(!initialConnection) }
+    var hasError by remember { mutableStateOf(false) }
     var isScrollAtTop by remember { mutableStateOf(true) }
     var canGoBackState by remember { mutableStateOf(false) }
     var canGoForwardState by remember { mutableStateOf(false) }
@@ -103,9 +102,6 @@ fun GameWebView(
 
     // Check for raw Github dynamic force updates on startup
     LaunchedEffect(Unit) {
-        if (!initialConnection) {
-            onPageLoaded()
-        }
         isCheckingUpdate = true
         try {
             val updateInfo = com.example.network.UpdateChecker.checkForUpdates()

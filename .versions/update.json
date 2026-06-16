@@ -1,7 +1,0 @@
-{
-  "versionCode": 41,
-  "versionName": "1.7.4",
-  "changeLog": "build: release version 1.7.4\n\n- Bump version to 1.7.4 (code 41)\n- Optimize splash screen timing and network handling\n- Add exception safety to network connectivity checks\n- Suppress initial launch network error toasts",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
-  "forceUpdate": true
-}
