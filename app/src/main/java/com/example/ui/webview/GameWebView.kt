@@ -77,9 +77,10 @@ fun GameWebView(
     
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-    var isPageLoading by remember { mutableStateOf(true) }
+    val isInitiallyConnected = remember { networkMonitor.isCurrentlyConnected() }
+    var isPageLoading by remember { mutableStateOf(isInitiallyConnected) }
     var loadingProgress by remember { mutableStateOf(0f) }
-    var hasError by remember { mutableStateOf(false) }
+    var hasError by remember { mutableStateOf(!isInitiallyConnected) }
     var isScrollAtTop by remember { mutableStateOf(true) }
     var canGoBackState by remember { mutableStateOf(false) }
     var canGoForwardState by remember { mutableStateOf(false) }
@@ -569,7 +570,9 @@ fun GameWebView(
                             isScrollAtTop = scrollY == 0
                         }
 
-                        loadUrl(targetUrl)
+                        if (isInitiallyConnected) {
+                            loadUrl(targetUrl)
+                        }
                         webViewInstance = this
                     }
                 },
@@ -643,9 +646,20 @@ fun GameWebView(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .clickable {
-                                    hasError = false
-                                    isPageLoading = true
-                                    webViewInstance?.reload()
+                                    if (networkMonitor.isCurrentlyConnected()) {
+                                        hasError = false
+                                        isPageLoading = true
+                                        val webView = webViewInstance
+                                        if (webView != null) {
+                                            if (webView.url == null || webView.url == "about:blank" || webView.url == "") {
+                                                webView.loadUrl(targetUrl)
+                                            } else {
+                                                webView.reload()
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(context, "No connection. Please check your internet and try again.", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                                 .padding(vertical = 12.dp, horizontal = 12.dp)
                                 .offset(x = (-12).dp)

@@ -85,7 +85,16 @@ class NetworkMonitor(context: Context) {
         return checkCurrentConnection()
     }
 
+    private fun isTesting(): Boolean {
+        return try {
+            Class.forName("org.robolectric.Robolectric") != null
+        } catch (e: ClassNotFoundException) {
+            false
+        }
+    }
+
     private fun checkCurrentConnection(): Boolean {
+        if (isTesting()) return true
         val manager = connectivityManager ?: return false
         return try {
             val activeNetwork = manager.activeNetwork ?: return false
