@@ -1,0 +1,7 @@
+{
+  "versionCode": 51,
+  "versionName": "1.7.9",
+  "changeLog": "build: bump version to 1.7.9\n\n- Increment version code to 51\n- Implement Robolectric test bypass in network monitor\n- Fix WebView loading state and initialization logic",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
+  "forceUpdate": true
+}
