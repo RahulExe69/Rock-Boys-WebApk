@@ -61,6 +61,7 @@ import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.network.NetworkMonitor
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -72,11 +73,14 @@ fun GameWebView(
 ) {
     val context = LocalContext.current
     
+    val networkMonitor = remember { NetworkMonitor(context.applicationContext) }
+    val initialConnection = remember { networkMonitor.isCurrentlyConnected() }
+    
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-    var isPageLoading by remember { mutableStateOf(true) }
+    var isPageLoading by remember { mutableStateOf(initialConnection) }
     var loadingProgress by remember { mutableStateOf(0f) }
-    var hasError by remember { mutableStateOf(false) }
+    var hasError by remember { mutableStateOf(!initialConnection) }
     var isScrollAtTop by remember { mutableStateOf(true) }
     var canGoBackState by remember { mutableStateOf(false) }
     var canGoForwardState by remember { mutableStateOf(false) }
@@ -99,6 +103,9 @@ fun GameWebView(
 
     // Check for raw Github dynamic force updates on startup
     LaunchedEffect(Unit) {
+        if (!initialConnection) {
+            onPageLoaded()
+        }
         isCheckingUpdate = true
         try {
             val updateInfo = com.example.network.UpdateChecker.checkForUpdates()

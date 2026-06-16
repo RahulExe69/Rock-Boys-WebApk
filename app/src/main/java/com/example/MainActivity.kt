@@ -36,6 +36,12 @@ class MainActivity : ComponentActivity() {
             isWebViewLoading
         }
         
+        // Launch a 2.5-second timeout safeguard to ensure the splash screen always dismisses
+        lifecycleScope.launch {
+            kotlinx.coroutines.delay(2500)
+            isWebViewLoading = false
+        }
+        
         enableEdgeToEdge()
         
         networkMonitor = NetworkMonitor(applicationContext)
