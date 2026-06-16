@@ -1,0 +1,7 @@
+{
+  "versionCode": 39,
+  "versionName": "1.7.3",
+  "changeLog": "chore: release v1.7.3 and improve splash reliability\n\n- Bump version to 1.7.3\n- Add 2.5s splash screen timeout safeguard\n- Improve initial WebView connection state handling",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
+  "forceUpdate": true
+}
