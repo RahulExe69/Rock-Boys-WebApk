@@ -61,7 +61,6 @@ import com.example.ui.theme.TextPrimary
 import com.example.ui.theme.TextSecondary
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.example.network.NetworkMonitor
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -72,8 +71,6 @@ fun GameWebView(
     onPageLoaded: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    
-    val networkMonitor = remember { NetworkMonitor(context.applicationContext) }
     
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
@@ -522,18 +519,10 @@ fun GameWebView(
                                 return false
                             }
 
-                            @Suppress("DEPRECATION")
-                            override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
-                                hasError = true
-                                isPageLoading = false
-                                onPageLoaded()
-                            }
-
                             override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
                                 if (request?.isForMainFrame == true) {
                                     hasError = true
                                     isPageLoading = false
-                                    onPageLoaded()
                                 }
                             }
                         }
