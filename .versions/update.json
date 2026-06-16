@@ -1,0 +1,7 @@
+{
+  "versionCode": 45,
+  "versionName": "1.7.6",
+  "changeLog": "chore: bump version to 1.7.6\n\n- Increment version code to 45 and version name to 1.7.6\n- Improve robustness of network monitoring and error handling during connectivity checks",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
+  "forceUpdate": true
+}
