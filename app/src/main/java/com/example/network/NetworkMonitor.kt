@@ -11,14 +11,28 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 class NetworkMonitor(context: Context) {
-    private val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private val connectivityManager: ConnectivityManager? = try {
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+    } catch (e: Exception) {
+        null
+    }
 
     val isConnected: Flow<Boolean> = callbackFlow {
         try {
             trySend(checkCurrentConnection())
         } catch (e: Exception) {
             trySend(true)
+        }
+
+        val manager = connectivityManager
+        if (manager == null) {
+            try {
+                trySend(false)
+            } catch (e: Exception) {
+                // Ignore flow state failures
+            }
+            close()
+            return@callbackFlow
         }
 
         val callback = object : ConnectivityManager.NetworkCallback() {
@@ -45,7 +59,7 @@ class NetworkMonitor(context: Context) {
 
         var isCallbackRegistered = false
         try {
-            connectivityManager.registerNetworkCallback(request, callback)
+            manager.registerNetworkCallback(request, callback)
             isCallbackRegistered = true
         } catch (e: Exception) {
             Log.e("NetworkMonitor", "Could not register network callback", e)
@@ -59,7 +73,7 @@ class NetworkMonitor(context: Context) {
         awaitClose {
             if (isCallbackRegistered) {
                 try {
-                    connectivityManager.unregisterNetworkCallback(callback)
+                    manager.unregisterNetworkCallback(callback)
                 } catch (e: Exception) {
                     // Ignore if already unregistered
                 }
@@ -72,9 +86,10 @@ class NetworkMonitor(context: Context) {
     }
 
     private fun checkCurrentConnection(): Boolean {
+        val manager = connectivityManager ?: return false
         return try {
-            val activeNetwork = connectivityManager.activeNetwork ?: return false
-            val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+            val activeNetwork = manager.activeNetwork ?: return false
+            val capabilities = manager.getNetworkCapabilities(activeNetwork) ?: return false
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         } catch (e: Exception) {
             false

@@ -86,8 +86,8 @@ object UpdateChecker {
             } catch (e: IOException) {
                 Log.e(TAG, "Network error checking updates", e)
                 null
-            } catch (e: Exception) {
-                Log.e(TAG, "Parsing error checking updates", e)
+            } catch (e: Throwable) {
+                Log.e(TAG, "Any other error checking updates", e)
                 null
             }
         }

@@ -53,19 +53,23 @@ class MainActivity : ComponentActivity() {
         // Monitor network state dynamically with a robust application context and main dispatcher safety, suppressing toast on initial launch without internet
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.Main) {
             var wasPreviouslyConnected: Boolean? = null
-            networkMonitor.isConnected.collectLatest { isConnected ->
-                if (wasPreviouslyConnected != null && wasPreviouslyConnected == true && !isConnected) {
-                    try {
-                        Toast.makeText(
-                            applicationContext,
-                            "Internet Connection Lost. Core sectors operating on cache.",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    } catch (e: Exception) {
-                        // Suppress any unexpected toast exceptions in background lifecycle transitions
+            try {
+                networkMonitor.isConnected.collectLatest { isConnected ->
+                    if (wasPreviouslyConnected != null && wasPreviouslyConnected == true && !isConnected) {
+                        try {
+                            Toast.makeText(
+                                applicationContext,
+                                "Internet Connection Lost. Core sectors operating on cache.",
+                                Toast.LENGTH_LONG
+                            ).show()
+                        } catch (e: Exception) {
+                            // Suppress any unexpected toast exceptions in background lifecycle transitions
+                        }
                     }
+                    wasPreviouslyConnected = isConnected
                 }
-                wasPreviouslyConnected = isConnected
+            } catch (e: Exception) {
+                // Safeguard main coroutine scope against network emission errors
             }
         }
 
