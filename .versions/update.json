@@ -1,7 +1,0 @@
-{
-  "versionCode": 33,
-  "versionName": "1.7.0",
-  "changeLog": "docs: remove remote versioning steps from AGENTS.md\n\nStreamline release documentation by removing outdated instructions for remote versioning.",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
-  "forceUpdate": true
-}
