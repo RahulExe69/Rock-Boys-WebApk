@@ -36,9 +36,16 @@ class MainActivity : ComponentActivity() {
             isWebViewLoading
         }
         
-        // Launch a 2.5-second timeout safeguard to ensure the splash screen always dismisses
+        var minimumSplashPassed = false
+        
+        // Launch a 1200ms minimum display timer and 2.5-second fallback backup safety to dismiss the splash screen smoothly
         lifecycleScope.launch {
-            kotlinx.coroutines.delay(2500)
+            kotlinx.coroutines.delay(1200)
+            minimumSplashPassed = true
+            if (!networkMonitor.isCurrentlyConnected()) {
+                isWebViewLoading = false
+            }
+            kotlinx.coroutines.delay(1300) // complete the 2.5-second ultimate backup safety timeout
             isWebViewLoading = false
         }
         
@@ -46,10 +53,11 @@ class MainActivity : ComponentActivity() {
         
         networkMonitor = NetworkMonitor(applicationContext)
 
-        // Monitor network state dynamically with a robust application context and main dispatcher safety
+        // Monitor network state dynamically with a robust application context and main dispatcher safety, suppressing toast on initial launch without internet
         lifecycleScope.launch(kotlinx.coroutines.Dispatchers.Main) {
+            var wasPreviouslyConnected: Boolean? = null
             networkMonitor.isConnected.collectLatest { isConnected ->
-                if (!isConnected) {
+                if (wasPreviouslyConnected != null && wasPreviouslyConnected == true && !isConnected) {
                     try {
                         Toast.makeText(
                             applicationContext,
@@ -60,6 +68,7 @@ class MainActivity : ComponentActivity() {
                         // Suppress any unexpected toast exceptions in background lifecycle transitions
                     }
                 }
+                wasPreviouslyConnected = isConnected
             }
         }
 
@@ -72,7 +81,12 @@ class MainActivity : ComponentActivity() {
                         finish() // Properly tear down and exit the app
                     },
                     onPageLoaded = {
-                        isWebViewLoading = false
+                        lifecycleScope.launch {
+                            while (!minimumSplashPassed) {
+                                kotlinx.coroutines.delay(100)
+                            }
+                            isWebViewLoading = false
+                        }
                     }
                 )
             }
