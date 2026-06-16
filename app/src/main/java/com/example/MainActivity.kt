@@ -54,13 +54,13 @@ class MainActivity : ComponentActivity() {
                                 "Internet Connection Lost. Core sectors operating on cache.",
                                 Toast.LENGTH_LONG
                             ).show()
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
                             // Suppress exceptions in transient states
                         }
                     }
                     wasPreviouslyConnected = isConnected
                 }
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 // Ignore flow collection failures
             }
         }

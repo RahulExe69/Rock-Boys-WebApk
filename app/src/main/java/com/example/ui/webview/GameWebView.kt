@@ -382,7 +382,7 @@ fun GameWebView(
                                 }
                             }
 
-                            override fun onPageFinished(view: WebView?, url: String?) {
+                            override fun onPageFinished(view: WebView?, url: String?) { if (hasError) { onPageLoaded(); return } // {
                                 isPageLoading = false
                                 canGoBackState = view?.canGoBack() ?: false
                                 canGoForwardState = view?.canGoForward() ?: false

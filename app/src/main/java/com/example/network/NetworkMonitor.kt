@@ -13,14 +13,14 @@ import kotlinx.coroutines.flow.callbackFlow
 class NetworkMonitor(context: Context) {
     private val connectivityManager: ConnectivityManager? = try {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
         null
     }
 
     val isConnected: Flow<Boolean> = callbackFlow {
         try {
             trySend(checkCurrentConnection())
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             trySend(true)
         }
 
@@ -28,7 +28,7 @@ class NetworkMonitor(context: Context) {
         if (manager == null) {
             try {
                 trySend(false)
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 // Ignore flow state failures
             }
             close()
@@ -39,7 +39,7 @@ class NetworkMonitor(context: Context) {
             override fun onAvailable(network: Network) {
                 try {
                     trySend(true)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     // Ignore flow state failures
                 }
             }
@@ -47,7 +47,7 @@ class NetworkMonitor(context: Context) {
             override fun onLost(network: Network) {
                 try {
                     trySend(false)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     // Ignore flow state failures
                 }
             }
@@ -61,11 +61,11 @@ class NetworkMonitor(context: Context) {
         try {
             manager.registerNetworkCallback(request, callback)
             isCallbackRegistered = true
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e("NetworkMonitor", "Could not register network callback", e)
             try {
                 trySend(checkCurrentConnection())
-            } catch (ex: Exception) {
+            } catch (ex: Throwable) {
                 // Ignore flow state failures
             }
         }
@@ -74,7 +74,7 @@ class NetworkMonitor(context: Context) {
             if (isCallbackRegistered) {
                 try {
                     manager.unregisterNetworkCallback(callback)
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     // Ignore if already unregistered
                 }
             }
@@ -91,7 +91,7 @@ class NetworkMonitor(context: Context) {
             val activeNetwork = manager.activeNetwork ?: return false
             val capabilities = manager.getNetworkCapabilities(activeNetwork) ?: return false
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             false
         }
     }

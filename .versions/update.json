@@ -1,7 +1,0 @@
-{
-  "versionCode": 47,
-  "versionName": "1.7.7",
-  "changeLog": "feat: upgrade app version to 1.7.7\n\n- Bump version to 1.7.7 (code 47)\n- Enhance network connectivity stability\n- Add error handling for WebView loading\n- Improve network monitor robustness",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
-  "forceUpdate": true
-}
