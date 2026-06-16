@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.util.Log
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -14,15 +15,27 @@ class NetworkMonitor(context: Context) {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     val isConnected: Flow<Boolean> = callbackFlow {
-        trySend(checkCurrentConnection())
+        try {
+            trySend(checkCurrentConnection())
+        } catch (e: Exception) {
+            trySend(true)
+        }
 
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                trySend(true)
+                try {
+                    trySend(true)
+                } catch (e: Exception) {
+                    // Ignore flow state failures
+                }
             }
 
             override fun onLost(network: Network) {
-                trySend(false)
+                try {
+                    trySend(false)
+                } catch (e: Exception) {
+                    // Ignore flow state failures
+                }
             }
         }
 
@@ -30,13 +43,26 @@ class NetworkMonitor(context: Context) {
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
-        connectivityManager.registerNetworkCallback(request, callback)
+        var isCallbackRegistered = false
+        try {
+            connectivityManager.registerNetworkCallback(request, callback)
+            isCallbackRegistered = true
+        } catch (e: Exception) {
+            Log.e("NetworkMonitor", "Could not register network callback", e)
+            try {
+                trySend(checkCurrentConnection())
+            } catch (ex: Exception) {
+                // Ignore flow state failures
+            }
+        }
 
         awaitClose {
-            try {
-                connectivityManager.unregisterNetworkCallback(callback)
-            } catch (e: Exception) {
-                // Ignore if already unregistered
+            if (isCallbackRegistered) {
+                try {
+                    connectivityManager.unregisterNetworkCallback(callback)
+                } catch (e: Exception) {
+                    // Ignore if already unregistered
+                }
             }
         }
     }

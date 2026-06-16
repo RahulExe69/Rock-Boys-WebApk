@@ -40,20 +40,18 @@ class MainActivity : ComponentActivity() {
         
         networkMonitor = NetworkMonitor(applicationContext)
 
-        // Monitor network state dynamically
-        lifecycleScope.launch {
+        // Monitor network state dynamically with a robust application context and main dispatcher safety
+        lifecycleScope.launch(kotlinx.coroutines.Dispatchers.Main) {
             networkMonitor.isConnected.collectLatest { isConnected ->
                 if (!isConnected) {
-                    runOnUiThread {
-                        try {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "Internet Connection Lost. Core sectors operating on cache.",
-                                Toast.LENGTH_LONG
-                            ).show()
-                        } catch (e: Exception) {
-                            // Suppress any unexpected toast exceptions in background lifecycle transitions
-                        }
+                    try {
+                        Toast.makeText(
+                            applicationContext,
+                            "Internet Connection Lost. Core sectors operating on cache.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } catch (e: Exception) {
+                        // Suppress any unexpected toast exceptions in background lifecycle transitions
                     }
                 }
             }

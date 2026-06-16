@@ -1,0 +1,7 @@
+{
+  "versionCode": 33,
+  "versionName": "1.7.0",
+  "changeLog": "Enhanced the Raid Reload (RR) tool floating button shape and app icon presentation to be perfectly round, renamed options to be highly intuitive, and engineered an advanced CI/CD release structure utilizing update.json as the single source of truth to bypass any release update race conditions.",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
+  "forceUpdate": true
+}
