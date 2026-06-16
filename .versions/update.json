@@ -1,0 +1,7 @@
+{
+  "versionCode": 43,
+  "versionName": "1.7.5",
+  "changeLog": "build: bump version to 1.7.5\n\n- Increment version code to 43 and name to 1.7.5\n- Refactor splash screen and webview loading logic to improve reliability on initial launch",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
+  "forceUpdate": true
+}
