@@ -1,7 +1,7 @@
 {
   "versionCode": 59,
   "versionName": "1.8.3",
-  "changeLog": "feat: add Raid Reload Tool with custom WebView\n\nUpgrade app version to 1.8.3 and implement the Raid Reload Tool feature with support for interactive calculations, DOM storage, and improved back-navigation handling.",
+  "changeLog": "Enabled seamless integration of the website's dynamic top header bar directly within the native Raid Reload Tool screen via an embedded WebView layer.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
