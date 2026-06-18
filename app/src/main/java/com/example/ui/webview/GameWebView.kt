@@ -1352,136 +1352,105 @@ fun RaidReloadMaintenanceScreen() {
     val networkMonitor = remember { NetworkMonitor(context) }
     val isOnline = networkMonitor.isCurrentlyConnected()
 
+    var isTopbarOverlayActive by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(bgWebsite)
-            .windowInsetsPadding(WindowInsets.statusBars)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
         ) {
             if (isOnline) {
-                Box(
+                Spacer(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.statusBars)
                         .height(84.dp)
-                ) {
-                    AndroidView(
-                        modifier = Modifier.fillMaxSize(),
-                        factory = { ctx ->
-                            WebView(ctx).apply {
-                                layoutParams = ViewGroup.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.MATCH_PARENT
-                                )
-                                settings.javaScriptEnabled = true
-                                settings.domStorageEnabled = true
-                                settings.databaseEnabled = true
-                                settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
-                                settings.useWideViewPort = true
-                                settings.loadWithOverviewMode = true
-                                setBackgroundColor(0) // transparent background
-                                webViewClient = object : WebViewClient() {
-                                    override fun onPageFinished(view: WebView?, url: String?) {
-                                        super.onPageFinished(view, url)
-                                        // Ensure body is clean, overflow hidden, styling is responsive
-                                        view?.evaluateJavascript(
-                                            "document.body.style.margin = '0';" +
-                                            "document.body.style.padding = '0';" +
-                                            "document.body.style.overflow = 'hidden';" +
-                                            "document.body.style.backgroundColor = 'transparent';" +
-                                            "document.body.style.width = '100vw';",
-                                            null
-                                        )
-                                    }
-                                }
-                                loadUrl("https://rockboys.netlify.app/topbar")
-                            }
-                        }
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp)
-            ) {
-                // Elegant Wood Theme Tool Banner/Header Bar (with NO arrow closes inside standard standalone page tab!)
-                Box(
+                )
+            } else {
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp)
-                        .background(titleBarColor, shape = RoundedCornerShape(12.dp))
-                        .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
-                        .padding(vertical = 12.dp, horizontal = 16.dp)
+                        .padding(horizontal = 16.dp)
                 ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Gold Star Badge Icon
+                    // Elegant Wood Theme Tool Banner/Header Bar (with NO arrow closes inside standard standalone page tab!)
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
-                            .background(Color(0xFFFDBC11), shape = RoundedCornerShape(8.dp))
-                            .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(8.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Raid Reload Star Icon",
-                            tint = Color(0xFF381504),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    // Title fields
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "RAID RELOAD TOOL",
-                            color = Color.White,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text = "Simulation Shield Helper",
-                            color = Color(0xFFD4D4D8),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
-                        )
-                    }
-
-                    // Green Ready Badge status tag
-                    Box(
-                        modifier = Modifier
-                            .background(Color(0xFFECFDF5), shape = RoundedCornerShape(50))
-                            .border(width = 1.dp, color = Color(0xFF34D399), shape = RoundedCornerShape(50))
-                            .padding(horizontal = 10.dp, vertical = 2.dp)
+                            .fillMaxWidth()
+                            .windowInsetsPadding(WindowInsets.statusBars)
+                            .padding(vertical = 12.dp)
+                            .background(titleBarColor, shape = RoundedCornerShape(12.dp))
+                            .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
+                            .padding(vertical = 12.dp, horizontal = 16.dp)
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Gold Star Badge Icon
                             Box(
                                 modifier = Modifier
-                                    .size(6.dp)
-                                    .background(Color(0xFF10B981), shape = RoundedCornerShape(percent = 50))
-                            )
-                            Text(
-                                text = "READY",
-                                color = Color(0xFF065F46),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black
-                            )
+                                    .size(36.dp)
+                                    .background(Color(0xFFFDBC11), shape = RoundedCornerShape(8.dp))
+                                    .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Raid Reload Star Icon",
+                                    tint = Color(0xFF381504),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            // Title fields
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "RAID RELOAD TOOL",
+                                    color = Color.White,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text = "Simulation Shield Helper",
+                                    color = Color(0xFFD4D4D8),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.5.sp
+                                )
+                            }
+
+                            // Green Ready Badge status tag
+                            Box(
+                                modifier = Modifier
+                                    .background(Color(0xFFECFDF5), shape = RoundedCornerShape(50))
+                                    .border(width = 1.dp, color = Color(0xFF34D399), shape = RoundedCornerShape(50))
+                                    .padding(horizontal = 10.dp, vertical = 2.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(6.dp)
+                                            .background(Color(0xFF10B981), shape = RoundedCornerShape(percent = 50))
+                                    )
+                                    Text(
+                                        text = "READY",
+                                        color = Color(0xFF065F46),
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -1492,6 +1461,7 @@ fun RaidReloadMaintenanceScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .padding(horizontal = 16.dp)
                     .verticalScroll(scrollState),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -1916,8 +1886,93 @@ fun RaidReloadMaintenanceScreen() {
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
+
+        if (isOnline) {
+            Box(
+                modifier = if (isTopbarOverlayActive) {
+                    Modifier.fillMaxSize()
+                } else {
+                    Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .height(84.dp)
+                }
+            ) {
+                AndroidView(
+                    modifier = Modifier.fillMaxSize(),
+                    factory = { ctx ->
+                        WebView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                            settings.javaScriptEnabled = true
+                            settings.domStorageEnabled = true
+                            settings.databaseEnabled = true
+                            settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+                            settings.useWideViewPort = true
+                            settings.loadWithOverviewMode = true
+                            setBackgroundColor(0) // transparent background
+                            
+                            val topbarInterface = TopbarAppInterface { active ->
+                                (ctx as? android.app.Activity)?.runOnUiThread {
+                                    isTopbarOverlayActive = active
+                                }
+                            }
+                            addJavascriptInterface(topbarInterface, "AndroidTopbar")
+                            addJavascriptInterface(topbarInterface, "AndroidInterface")
+                            
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    view?.evaluateJavascript(
+                                        "document.body.style.margin = '0';" +
+                                        "document.body.style.padding = '0';" +
+                                        "document.body.style.overflow = 'hidden';" +
+                                        "document.body.style.backgroundColor = 'transparent';" +
+                                        "document.body.style.width = '100vw';" +
+                                        "(function() { " +
+                                        "  function checkOverlays() { " +
+                                        "    var hasActiveOverlay = false; " +
+                                        "    var elements = document.querySelectorAll('*'); " +
+                                        "    for (var i = 0; i < elements.length; i++) { " +
+                                        "      var el = elements[i]; " +
+                                        "      if (el === document.body || el === document.documentElement || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue; " +
+                                        "      var style = window.getComputedStyle(el); " +
+                                        "      if ((style.position === 'fixed' || style.position === 'absolute') && style.display !== 'none' && style.visibility !== 'hidden') { " +
+                                        "        var rect = el.getBoundingClientRect(); " +
+                                        "        if (rect.bottom > 90 && rect.height > 100 && rect.width > 100) { " +
+                                        "          hasActiveOverlay = true; " +
+                                        "          break; " +
+                                        "        } " +
+                                        "      } " +
+                                        "    } " +
+                                        "    var bridge = window.AndroidInterface || window.AndroidTopbar; " +
+                                        "    if (bridge && typeof bridge.setOverlayActive === 'function') { " +
+                                        "      bridge.setOverlayActive(hasActiveOverlay); " +
+                                        "    } " +
+                                        "  } " +
+                                        "  document.addEventListener('click', function() { " +
+                                        "    setTimeout(checkOverlays, 100); " +
+                                        "    setTimeout(checkOverlays, 350); " +
+                                        "  }); " +
+                                        "  var observer = new MutationObserver(function() { " +
+                                        "    checkOverlays(); " +
+                                        "  }); " +
+                                        "  observer.observe(document.body, { childList: true, subtree: true, attributes: true }); " +
+                                        "  setTimeout(checkOverlays, 500); " +
+                                        "})();",
+                                        null
+                                    )
+                                }
+                            }
+                            loadUrl("https://rockboys.netlify.app/topbar")
+                        }
+                    }
+                )
+            }
+        }
     }
-}
 }
 
 
@@ -2196,6 +2251,14 @@ fun ForceUpdateScreen(
         }
     }
 }
+
+class TopbarAppInterface(private val onOverlayStateChanged: (Boolean) -> Unit) {
+    @android.webkit.JavascriptInterface
+    fun setOverlayActive(active: Boolean) {
+        onOverlayStateChanged(active)
+    }
+}
+
 
 
 
