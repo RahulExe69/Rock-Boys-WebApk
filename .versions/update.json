@@ -1,7 +1,7 @@
 {
   "versionCode": 55,
   "versionName": "1.8.1",
-  "changeLog": "Fixed offline launch issue and crash when starting app with no internet connection. Configured advanced WebView cacheMode fallback and unconditional retry reloading to prevent transient connection state locks.",
+  "changeLog": "fix: resolve offline launch crashes and update logic\n\n- Bump version to 1.8.1\n- Implement WebView cache fallback for offline usage\n- Enable unconditional retry for connection stability\n- Use lazy initialization for OkHttpClient\n- Improve error handling in UpdateChecker",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
