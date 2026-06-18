@@ -1,7 +1,7 @@
 {
-  "versionCode": 57,
-  "versionName": "1.8.2",
-  "changeLog": "Aligned starting splash screen transitions cleanly without dimensional jump, and implemented secure double URL request fallbacks to ensure force updates check successfully under all conditions.",
+  "versionCode": 59,
+  "versionName": "1.8.3",
+  "changeLog": "Configured Raid Reload Tool tab with advanced custom WebView loader supporting interactive calculation controls and modern DOM storage preferences.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

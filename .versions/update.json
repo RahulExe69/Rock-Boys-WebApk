@@ -1,7 +1,7 @@
 {
-  "versionCode": 57,
-  "versionName": "1.8.2",
-  "changeLog": "feat: bump version to 1.8.2 and improve reliability\n\n- Align splash screen transitions to prevent visual jumps\n- Implement fallback update URLs to ensure force-check success\n- Add detailed logging for update monitoring and debugging",
+  "versionCode": 59,
+  "versionName": "1.8.3",
+  "changeLog": "Configured Raid Reload Tool tab with advanced custom WebView loader supporting interactive calculation controls and modern DOM storage preferences.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
