@@ -1,7 +1,7 @@
 {
   "versionCode": 57,
   "versionName": "1.8.2",
-  "changeLog": "Aligned starting splash screen transitions cleanly without dimensional jump, and implemented secure double URL request fallbacks to ensure force updates check successfully under all conditions.",
+  "changeLog": "feat: bump version to 1.8.2 and improve reliability\n\n- Align splash screen transitions to prevent visual jumps\n- Implement fallback update URLs to ensure force-check success\n- Add detailed logging for update monitoring and debugging",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
