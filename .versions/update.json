@@ -1,7 +1,7 @@
 {
   "versionCode": 59,
   "versionName": "1.8.3",
-  "changeLog": "Enabled seamless integration of the website's dynamic top header bar directly within the native Raid Reload Tool screen via an embedded WebView layer.",
+  "changeLog": "feat: integrate dynamic header in Raid Reload Tool\n\nUpdate Raid Reload Tool to include the website's top header bar via WebView and simplify back-navigation logic.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
