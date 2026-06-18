@@ -1,7 +1,7 @@
 {
   "versionCode": 61,
   "versionName": "1.8.4",
-  "changeLog": "Aligned website topbar wood banner natively at absolute top edge, and added real-time JavaScript MutationObserver bridge to handle full-screen sidebar drawers and search modals without clipping.",
+  "changeLog": "chore: bump version to 1.8.4\n\nOptimize WebView header alignment and implement MutationObserver for improved full-screen modal handling.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
