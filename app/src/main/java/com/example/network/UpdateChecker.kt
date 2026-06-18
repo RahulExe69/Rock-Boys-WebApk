@@ -29,7 +29,7 @@ object UpdateChecker {
     const val GOOGLE_DRIVE_VERSION_FILE_ID = "1A_2B_3C_Replace_With_Your_Google_Drive_File_ID_Here"
 
     private const val UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/update.json"
-    private val client = OkHttpClient()
+    private val client by lazy { OkHttpClient() }
 
     fun getRunningVersionCode(context: Context): Int {
         return try {
@@ -40,7 +40,7 @@ object UpdateChecker {
                 @Suppress("DEPRECATION")
                 packageInfo.versionCode
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             1
         }
     }
@@ -49,7 +49,7 @@ object UpdateChecker {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
             packageInfo.versionName ?: "1.0"
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             "1.0"
         }
     }
@@ -135,7 +135,7 @@ object UpdateChecker {
                     }
                 }
                 true
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 Log.e(TAG, "Exception during APK download", e)
                 false
             }
@@ -161,7 +161,7 @@ object UpdateChecker {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
             }
             context.startActivity(intent)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.e(TAG, "Failed to launch package installer", e)
             Toast.makeText(context, "Failed to start installation: ${e.message}", Toast.LENGTH_LONG).show()
         }

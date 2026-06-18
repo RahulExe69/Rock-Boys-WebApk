@@ -77,10 +77,16 @@ fun GameWebView(
     
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-    val isInitiallyConnected = remember { networkMonitor.isCurrentlyConnected() }
-    var isPageLoading by remember { mutableStateOf(isInitiallyConnected) }
+    val isInitiallyConnected = remember {
+        try {
+            networkMonitor.isCurrentlyConnected()
+        } catch (e: Throwable) {
+            false
+        }
+    }
+    var isPageLoading by remember { mutableStateOf(true) }
     var loadingProgress by remember { mutableStateOf(0f) }
-    var hasError by remember { mutableStateOf(!isInitiallyConnected) }
+    var hasError by remember { mutableStateOf(false) }
     var isScrollAtTop by remember { mutableStateOf(true) }
     var canGoBackState by remember { mutableStateOf(false) }
     var canGoForwardState by remember { mutableStateOf(false) }
@@ -326,7 +332,7 @@ fun GameWebView(
                         settings.setDisplayZoomControls(false)
                         settings.textZoom = 100
                         settings.mediaPlaybackRequiresUserGesture = false
-                        settings.cacheMode = WebSettings.LOAD_DEFAULT
+                        settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
                         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
                         // Add WebView Interface Handler to listen to bottom bar state transitions
@@ -570,9 +576,7 @@ fun GameWebView(
                             isScrollAtTop = scrollY == 0
                         }
 
-                        if (isInitiallyConnected) {
-                            loadUrl(targetUrl)
-                        }
+                        loadUrl(targetUrl)
                         webViewInstance = this
                     }
                 },
@@ -592,23 +596,39 @@ fun GameWebView(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF150B09)), // Safe warm dark brown fallback
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(Color(0xFF2E1A16), Color(0xFF0F0806)),
+                                radius = 2000f
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    // Try to render the provided background image
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.no_network_background),
-                        contentDescription = "No Network Background",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                    )
-                    
-                    // Darken background overlay
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Black.copy(alpha = 0.15f))
-                    )
+                    // Subtle grid background drawn safely on Canvas - 100% crash-proof
+                    Canvas(modifier = Modifier.fillMaxSize()) {
+                        val strokeWidth = 1.dp.toPx()
+                        val gridColor = Color(0xFF3E2620).copy(alpha = 0.22f)
+                        val step = 44.dp.toPx()
+                        
+                        // Diagonal crossing lines
+                        val maxDim = size.width + size.height
+                        var offset = -maxDim
+                        while (offset < maxDim) {
+                            drawLine(
+                                color = gridColor,
+                                start = Offset(offset, 0f),
+                                end = Offset(offset + size.height, size.height),
+                                strokeWidth = strokeWidth
+                            )
+                            drawLine(
+                                color = gridColor,
+                                start = Offset(offset, size.height),
+                                end = Offset(offset + size.height, 0f),
+                                strokeWidth = strokeWidth
+                            )
+                            offset += step
+                        }
+                    }
 
                     // Authentically styled CoC Connection Error Card
                     Column(
@@ -646,19 +666,18 @@ fun GameWebView(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(4.dp))
                                 .clickable {
-                                    if (networkMonitor.isCurrentlyConnected()) {
-                                        hasError = false
-                                        isPageLoading = true
-                                        val webView = webViewInstance
-                                        if (webView != null) {
-                                            if (webView.url == null || webView.url == "about:blank" || webView.url == "") {
-                                                webView.loadUrl(targetUrl)
-                                            } else {
-                                                webView.reload()
-                                            }
+                                    hasError = false
+                                    isPageLoading = true
+                                    val webView = webViewInstance
+                                    if (webView != null) {
+                                        if (webView.url == null || webView.url == "about:blank" || webView.url == "") {
+                                            webView.loadUrl(targetUrl)
+                                        } else {
+                                            webView.reload()
                                         }
-                                    } else {
-                                        Toast.makeText(context, "No connection. Please check your internet and try again.", Toast.LENGTH_SHORT).show()
+                                    }
+                                    if (!networkMonitor.isCurrentlyConnected()) {
+                                        Toast.makeText(context, "Attempting connection... please check your internet.", Toast.LENGTH_SHORT).show()
                                     }
                                 }
                                 .padding(vertical = 12.dp, horizontal = 12.dp)

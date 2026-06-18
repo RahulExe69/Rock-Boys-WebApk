@@ -1,7 +1,7 @@
 {
-  "versionCode": 51,
-  "versionName": "1.7.9",
-  "changeLog": "build: bump version to 1.7.9\n\n- Increment version code to 51\n- Implement Robolectric test bypass in network monitor\n- Fix WebView loading state and initialization logic",
+  "versionCode": 55,
+  "versionName": "1.8.1",
+  "changeLog": "Fixed offline launch issue and crash when starting app with no internet connection. Configured advanced WebView cacheMode fallback and unconditional retry reloading to prevent transient connection state locks.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
