@@ -1,7 +1,7 @@
 {
-  "versionCode": 55,
-  "versionName": "1.8.1",
-  "changeLog": "Fixed offline launch issue and crash when starting app with no internet connection. Configured advanced WebView cacheMode fallback and unconditional retry reloading to prevent transient connection state locks.",
+  "versionCode": 57,
+  "versionName": "1.8.2",
+  "changeLog": "Aligned starting splash screen transitions cleanly without dimensional jump, and implemented secure double URL request fallbacks to ensure force updates check successfully under all conditions.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

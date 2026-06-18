@@ -111,16 +111,23 @@ fun GameWebView(
     LaunchedEffect(Unit) {
         isCheckingUpdate = true
         try {
+            android.util.Log.d("UpdateCheck", "Starting background update check tasks...")
             val updateInfo = com.example.network.UpdateChecker.checkForUpdates()
             if (updateInfo != null) {
                 val runningCode = com.example.network.UpdateChecker.getRunningVersionCode(context)
+                android.util.Log.d("UpdateCheck", "Version details fetched. Running Code: $runningCode, Remote Code: ${updateInfo.versionCode}")
                 if (updateInfo.versionCode > runningCode && updateInfo.forceUpdate) {
+                    android.util.Log.d("UpdateCheck", "New force update available! Displaying force update alert overlay.")
                     detectedUpdateInfo = updateInfo
                     showForceUpdateScreen = true
+                } else {
+                    android.util.Log.d("UpdateCheck", "Application is fully up to date. Version comparison matched (Running: $runningCode vs Remote: ${updateInfo.versionCode})")
                 }
+            } else {
+                android.util.Log.e("UpdateCheck", "Could not fetch remote version metadata. Check skipped.")
             }
         } catch (e: Exception) {
-            // Silence to avoid blocking the user if they're completely offline
+            android.util.Log.e("UpdateCheck", "Failure executing state check tasks: ${e.message}", e)
         } finally {
             isCheckingUpdate = false
         }

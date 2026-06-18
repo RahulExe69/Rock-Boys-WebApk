@@ -29,6 +29,7 @@ object UpdateChecker {
     const val GOOGLE_DRIVE_VERSION_FILE_ID = "1A_2B_3C_Replace_With_Your_Google_Drive_File_ID_Here"
 
     private const val UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/update.json"
+    private const val BACKUP_UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/version.json"
     private val client by lazy { OkHttpClient() }
 
     fun getRunningVersionCode(context: Context): Int {
@@ -61,6 +62,25 @@ object UpdateChecker {
             "$UPDATE_URL?t=${System.currentTimeMillis()}"
         }
         
+        Log.d(TAG, "Checking update on primary URL: $targetUrl")
+        var updateInfo = fetchUpdateFromUrl(targetUrl)
+
+        if (updateInfo == null && !USE_GOOGLE_DRIVE) {
+            val fallbackUrl = "$BACKUP_UPDATE_URL?t=${System.currentTimeMillis()}"
+            Log.d(TAG, "Primary update URL failed or returned null. Trying backup URL: $fallbackUrl")
+            updateInfo = fetchUpdateFromUrl(fallbackUrl)
+        }
+
+        if (updateInfo != null) {
+            Log.d(TAG, "Update check successful. Server version: ${updateInfo.versionName} (${updateInfo.versionCode}), forceUpdate: ${updateInfo.forceUpdate}")
+        } else {
+            Log.e(TAG, "Update check failed on all endpoints.")
+        }
+
+        return updateInfo
+    }
+
+    private suspend fun fetchUpdateFromUrl(targetUrl: String): UpdateInfo? {
         val request = Request.Builder()
             .url(targetUrl)
             .header("Cache-Control", "no-cache")
@@ -70,7 +90,7 @@ object UpdateChecker {
             try {
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        Log.e(TAG, "Failed to fetch version info: ${response.code}")
+                        Log.e(TAG, "Failed to fetch version info: ${response.code} for $targetUrl")
                         return@withContext null
                     }
                     val bodyString = response.body?.string() ?: return@withContext null
@@ -84,10 +104,10 @@ object UpdateChecker {
                     )
                 }
             } catch (e: IOException) {
-                Log.e(TAG, "Network error checking updates", e)
+                Log.e(TAG, "Network error checking updates for $targetUrl: ${e.message}")
                 null
             } catch (e: Throwable) {
-                Log.e(TAG, "Any other error checking updates", e)
+                Log.e(TAG, "Error checking updates for $targetUrl: ${e.message}")
                 null
             }
         }

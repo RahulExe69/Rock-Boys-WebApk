@@ -1,7 +1,7 @@
 {
-  "versionCode": 55,
-  "versionName": "1.8.1",
-  "changeLog": "fix: resolve offline launch crashes and update logic\n\n- Bump version to 1.8.1\n- Implement WebView cache fallback for offline usage\n- Enable unconditional retry for connection stability\n- Use lazy initialization for OkHttpClient\n- Improve error handling in UpdateChecker",
+  "versionCode": 57,
+  "versionName": "1.8.2",
+  "changeLog": "Aligned starting splash screen transitions cleanly without dimensional jump, and implemented secure double URL request fallbacks to ensure force updates check successfully under all conditions.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

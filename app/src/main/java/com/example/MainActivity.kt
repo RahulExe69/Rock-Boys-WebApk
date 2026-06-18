@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.example.network.NetworkMonitor
@@ -90,13 +93,14 @@ class MainActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Color(0xFF07090E))
+                                .background(Color(0xFF07090E)),
+                            contentAlignment = Alignment.Center
                         ) {
                             Image(
                                 painter = painterResource(id = R.drawable.rock_boys_splash),
                                 contentDescription = "Starting Screen",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                                modifier = Modifier.size(144.dp),
+                                contentScale = ContentScale.Fit
                             )
                         }
                     }
