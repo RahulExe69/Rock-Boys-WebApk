@@ -1,7 +1,7 @@
 {
   "versionCode": 63,
   "versionName": "1.8.5",
-  "changeLog": "Configured website topbar WebView as a full-screen transparent overlay with touch pass-through. Modals, search drawers and sidebar overlays render cleanly in full-screen on top of native layout, while native UI gestures pass through flawlessly when overlays are closed.",
+  "changeLog": "feat: implement full-screen transparent WebView\n\nConfigure WebView as a full-screen overlay with touch pass-through to ensure modals, search drawers, and sidebars render correctly while maintaining native UI gesture functionality. Bump version to 1.8.5.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
