@@ -1,7 +1,7 @@
 {
-  "versionCode": 63,
-  "versionName": "1.8.5",
-  "changeLog": "Configured website topbar WebView as a full-screen transparent overlay with touch pass-through. Modals, search drawers and sidebar overlays render cleanly in full-screen on top of native layout, while native UI gestures pass through flawlessly when overlays are closed.",
+  "versionCode": 65,
+  "versionName": "1.8.6",
+  "changeLog": "Implemented real-time bidirectional navigation bridge between Topbar WebView and main Home WebView. Searching players, clans, or clicking verified profiles inside the Raid Reload tool now switches seamlessly back to the Home board and loads the corresponding target page.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

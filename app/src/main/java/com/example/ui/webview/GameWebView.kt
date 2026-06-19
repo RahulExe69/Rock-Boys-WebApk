@@ -709,7 +709,10 @@ fun GameWebView(
                 enter = fadeIn(animationSpec = androidx.compose.animation.core.tween(300)),
                 exit = fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
             ) {
-                RaidReloadMaintenanceScreen()
+                RaidReloadMaintenanceScreen(
+                    webViewInstance = webViewInstance,
+                    onCloseRequest = { isRaidReloadActive = false }
+                )
             }
 
             // Force Dynamic APK Update Overlay Screen
@@ -1164,7 +1167,10 @@ fun Clash3DButton(
 }
 
 @Composable
-fun RaidReloadMaintenanceScreen() {
+fun RaidReloadMaintenanceScreen(
+    webViewInstance: WebView?,
+    onCloseRequest: () -> Unit
+) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
@@ -1913,15 +1919,37 @@ fun RaidReloadMaintenanceScreen() {
                             settings.loadWithOverviewMode = true
                             setBackgroundColor(0) // transparent background
                             
-                            val topbarInterface = TopbarAppInterface { active ->
-                                (ctx as? android.app.Activity)?.runOnUiThread {
-                                    isTopbarOverlayActive = active
+                            val topbarInterface = TopbarAppInterface(
+                                onOverlayStateChanged = { active ->
+                                    (ctx as? android.app.Activity)?.runOnUiThread {
+                                        isTopbarOverlayActive = active
+                                    }
+                                },
+                                onNavigateToUrl = { url ->
+                                    (ctx as? android.app.Activity)?.runOnUiThread {
+                                        isTopbarOverlayActive = false
+                                        webViewInstance?.loadUrl(url)
+                                        onCloseRequest()
+                                    }
                                 }
-                            }
+                            )
                             addJavascriptInterface(topbarInterface, "AndroidTopbar")
                             addJavascriptInterface(topbarInterface, "AndroidInterface")
                             
                             webViewClient = object : WebViewClient() {
+                                override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
+                                    val url = request?.url?.toString() ?: return false
+                                    if (url.contains("rockboys.netlify.app") && !url.contains("/topbar")) {
+                                        (ctx as? android.app.Activity)?.runOnUiThread {
+                                            isTopbarOverlayActive = false
+                                            webViewInstance?.loadUrl(url)
+                                            onCloseRequest()
+                                        }
+                                        return true
+                                    }
+                                    return super.shouldOverrideUrlLoading(view, request)
+                                }
+
                                 override fun onPageFinished(view: WebView?, url: String?) {
                                     super.onPageFinished(view, url)
                                     view?.evaluateJavascript(
@@ -1960,6 +1988,42 @@ fun RaidReloadMaintenanceScreen() {
                                         "  }); " +
                                         "  observer.observe(document.body, { childList: true, subtree: true, attributes: true }); " +
                                         "  setTimeout(checkOverlays, 500); " +
+                                        "  var lastUrl = window.location.href; " +
+                                        "  function checkUrlChange() { " +
+                                        "    var currentUrl = window.location.href; " +
+                                        "    if (currentUrl !== lastUrl) { " +
+                                        "      lastUrl = currentUrl; " +
+                                        "      if (currentUrl.indexOf('/topbar') === -1) { " +
+                                        "        var bridge = window.AndroidInterface || window.AndroidTopbar; " +
+                                        "        if (bridge && typeof bridge.navigateToUrl === 'function') { " +
+                                        "          bridge.navigateToUrl(currentUrl); " +
+                                        "        } " +
+                                        "        window.history.replaceState(null, '', '/topbar'); " +
+                                        "      } " +
+                                        "    } " +
+                                        "  } " +
+                                        "  setInterval(checkUrlChange, 100); " +
+                                        "  document.addEventListener('click', function(e) { " +
+                                        "    var target = e.target; " +
+                                        "    while (target && target !== document.body) { " +
+                                        "      if (target.tagName === 'A') { " +
+                                        "        var href = target.getAttribute('href'); " +
+                                        "        if (href) { " +
+                                        "          var absoluteUrl = new URL(href, window.location.href).href; " +
+                                        "          if (absoluteUrl.indexOf('rockboys.netlify.app') !== -1 && absoluteUrl.indexOf('/topbar') === -1) { " +
+                                        "            e.preventDefault(); " +
+                                        "            e.stopPropagation(); " +
+                                        "            var bridge = window.AndroidInterface || window.AndroidTopbar; " +
+                                        "            if (bridge && typeof bridge.navigateToUrl === 'function') { " +
+                                        "              bridge.navigateToUrl(absoluteUrl); " +
+                                        "            } " +
+                                        "            return; " +
+                                        "          } " +
+                                        "        } " +
+                                        "      } " +
+                                        "      target = target.parentNode; " +
+                                        "    } " +
+                                        "  }, true); " +
                                         "})();",
                                         null
                                     )
@@ -2257,10 +2321,18 @@ fun ForceUpdateScreen(
     }
 }
 
-class TopbarAppInterface(private val onOverlayStateChanged: (Boolean) -> Unit) {
+class TopbarAppInterface(
+    private val onOverlayStateChanged: (Boolean) -> Unit,
+    private val onNavigateToUrl: (String) -> Unit
+) {
     @android.webkit.JavascriptInterface
     fun setOverlayActive(active: Boolean) {
         onOverlayStateChanged(active)
+    }
+
+    @android.webkit.JavascriptInterface
+    fun navigateToUrl(url: String) {
+        onNavigateToUrl(url)
     }
 }
 
