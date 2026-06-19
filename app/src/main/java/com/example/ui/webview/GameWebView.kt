@@ -78,6 +78,8 @@ fun GameWebView(
     
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
+    var topbarWebViewInstance by remember { mutableStateOf<WebView?>(null) }
+    var hasNavigatedFromHome by remember { mutableStateOf(false) }
     val isInitiallyConnected = remember {
         try {
             networkMonitor.isCurrentlyConnected()
@@ -389,11 +391,16 @@ fun GameWebView(
                                 // Automatically manage bottom bar visibility based on URL keyword heuristics as a robust fallback
                                 val mainActivity = ctx as? MainActivity
                                 if (mainActivity != null) {
+                                    val cleanUrl = url?.substringBefore("?")?.substringBefore("#")
+                                    val isRootHome = cleanUrl == "https://rockboys.netlify.app" || cleanUrl == "https://rockboys.netlify.app/"
+                                    if (!isRootHome && url != null) {
+                                        hasNavigatedFromHome = true
+                                    }
                                     val isClanDashboard = url?.contains("/clan", ignoreCase = true) == true || 
                                                           url?.contains("dashboard", ignoreCase = true) == true || 
                                                           url?.contains("alliance", ignoreCase = true) == true ||
                                                           url?.contains("/alliance", ignoreCase = true) == true
-                                    mainActivity.updateBottomBarVisibility(isClanDashboard)
+                                    mainActivity.updateBottomBarVisibility(hasNavigatedFromHome || isClanDashboard)
                                 }
                             }
 
@@ -405,13 +412,16 @@ fun GameWebView(
                                 // Re-verify on page loaded
                                 val mainActivity = ctx as? MainActivity
                                 if (mainActivity != null) {
+                                    val cleanUrl = url?.substringBefore("?")?.substringBefore("#")
+                                    val isRootHome = cleanUrl == "https://rockboys.netlify.app" || cleanUrl == "https://rockboys.netlify.app/"
+                                    if (!isRootHome && url != null) {
+                                        hasNavigatedFromHome = true
+                                    }
                                     val isClanDashboard = url?.contains("/clan", ignoreCase = true) == true || 
                                                           url?.contains("dashboard", ignoreCase = true) == true || 
                                                           url?.contains("alliance", ignoreCase = true) == true ||
                                                           url?.contains("/alliance", ignoreCase = true) == true
-                                    if (isClanDashboard) {
-                                        mainActivity.updateBottomBarVisibility(true)
-                                    }
+                                    mainActivity.updateBottomBarVisibility(hasNavigatedFromHome || isClanDashboard)
                                 }
                                 
                                 // Inject mobile viewport configurations to completely block pinch and double-tap zoom
@@ -711,6 +721,8 @@ fun GameWebView(
             ) {
                 RaidReloadMaintenanceScreen(
                     webViewInstance = webViewInstance,
+                    topbarWebViewInstance = topbarWebViewInstance,
+                    onTopbarWebViewCreated = { topbarWebViewInstance = it },
                     onCloseRequest = { isRaidReloadActive = false }
                 )
             }
@@ -1169,6 +1181,8 @@ fun Clash3DButton(
 @Composable
 fun RaidReloadMaintenanceScreen(
     webViewInstance: WebView?,
+    topbarWebViewInstance: WebView?,
+    onTopbarWebViewCreated: (WebView) -> Unit,
     onCloseRequest: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1369,6 +1383,10 @@ fun RaidReloadMaintenanceScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(scrollState),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (isOnline) {
                 Spacer(
@@ -1377,101 +1395,88 @@ fun RaidReloadMaintenanceScreen(
                         .height(84.dp)
                 )
             } else {
-                Column(
+                Spacer(
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .height(12.dp)
+                )
+                // Elegant Wood Theme Tool Banner/Header Bar (with NO arrow closes inside standard standalone page tab!)
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .background(titleBarColor, shape = RoundedCornerShape(12.dp))
+                        .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
+                        .padding(vertical = 12.dp, horizontal = 16.dp)
                 ) {
-                    // Elegant Wood Theme Tool Banner/Header Bar (with NO arrow closes inside standard standalone page tab!)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .windowInsetsPadding(WindowInsets.statusBars)
-                            .padding(vertical = 12.dp)
-                            .background(titleBarColor, shape = RoundedCornerShape(12.dp))
-                            .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(12.dp))
-                            .padding(vertical = 12.dp, horizontal = 16.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
+                        // Gold Star Badge Icon
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Color(0xFFFDBC11), shape = RoundedCornerShape(8.dp))
+                                .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
                         ) {
-                            // Gold Star Badge Icon
-                            Box(
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .background(Color(0xFFFDBC11), shape = RoundedCornerShape(8.dp))
-                                    .border(width = 1.5.dp, color = borderCharcoal, shape = RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = "Raid Reload Star Icon",
+                                tint = Color(0xFF381504),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        // Title fields
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                text = "RAID RELOAD TOOL",
+                                color = Color.White,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            )
+                            Text(
+                                text = "Simulation Shield Helper",
+                                color = Color(0xFFD4D4D8),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.5.sp
+                            )
+                        }
+
+                        // Green Ready Badge status tag
+                        Box(
+                            modifier = Modifier
+                                .background(Color(0xFFECFDF5), shape = RoundedCornerShape(50))
+                                .border(width = 1.dp, color = Color(0xFF34D399), shape = RoundedCornerShape(50))
+                                .padding(horizontal = 10.dp, vertical = 2.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Star,
-                                    contentDescription = "Raid Reload Star Icon",
-                                    tint = Color(0xFF381504),
-                                    modifier = Modifier.size(20.dp)
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .background(Color(0xFF10B981), shape = RoundedCornerShape(percent = 50))
                                 )
-                            }
-
-                            Spacer(modifier = Modifier.width(12.dp))
-
-                            // Title fields
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
                                 Text(
-                                    text = "RAID RELOAD TOOL",
-                                    color = Color.White,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.sp
+                                    text = "READY",
+                                    color = Color(0xFF065F46),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black
                                 )
-                                Text(
-                                    text = "Simulation Shield Helper",
-                                    color = Color(0xFFD4D4D8),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.5.sp
-                                )
-                            }
-
-                            // Green Ready Badge status tag
-                            Box(
-                                modifier = Modifier
-                                    .background(Color(0xFFECFDF5), shape = RoundedCornerShape(50))
-                                    .border(width = 1.dp, color = Color(0xFF34D399), shape = RoundedCornerShape(50))
-                                    .padding(horizontal = 10.dp, vertical = 2.dp)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(6.dp)
-                                            .background(Color(0xFF10B981), shape = RoundedCornerShape(percent = 50))
-                                    )
-                                    Text(
-                                        text = "READY",
-                                        color = Color(0xFF065F46),
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Black
-                                    )
-                                }
                             }
                         }
                     }
                 }
             }
-
-            // Scrollable Content Column
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp)
-                    .verticalScroll(scrollState),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
                 // Card 1: Raid Connection Info Card
                 Box(
                     modifier = Modifier
@@ -1891,7 +1896,6 @@ fun RaidReloadMaintenanceScreen(
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-            }
         }
 
         if (isOnline) {
@@ -1901,12 +1905,15 @@ fun RaidReloadMaintenanceScreen(
             val totalActiveHeight = statusBarHeightPx + topBarHeightPx
 
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .padding(bottom = 72.dp)
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
-                        TouchPassThroughWebView(ctx).apply {
+                        topbarWebViewInstance ?: TouchPassThroughWebView(ctx).apply {
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -1921,12 +1928,12 @@ fun RaidReloadMaintenanceScreen(
                             
                             val topbarInterface = TopbarAppInterface(
                                 onOverlayStateChanged = { active ->
-                                    (ctx as? android.app.Activity)?.runOnUiThread {
+                                    (context as? android.app.Activity)?.runOnUiThread {
                                         isTopbarOverlayActive = active
                                     }
                                 },
                                 onNavigateToUrl = { url ->
-                                    (ctx as? android.app.Activity)?.runOnUiThread {
+                                    (context as? android.app.Activity)?.runOnUiThread {
                                         isTopbarOverlayActive = false
                                         webViewInstance?.loadUrl(url)
                                         onCloseRequest()
@@ -1935,12 +1942,13 @@ fun RaidReloadMaintenanceScreen(
                             )
                             addJavascriptInterface(topbarInterface, "AndroidTopbar")
                             addJavascriptInterface(topbarInterface, "AndroidInterface")
+                            tag = topbarInterface
                             
                             webViewClient = object : WebViewClient() {
                                 override fun shouldOverrideUrlLoading(view: WebView?, request: android.webkit.WebResourceRequest?): Boolean {
                                     val url = request?.url?.toString() ?: return false
                                     if (url.contains("rockboys.netlify.app") && !url.contains("/topbar")) {
-                                        (ctx as? android.app.Activity)?.runOnUiThread {
+                                        (context as? android.app.Activity)?.runOnUiThread {
                                             isTopbarOverlayActive = false
                                             webViewInstance?.loadUrl(url)
                                             onCloseRequest()
@@ -2030,12 +2038,29 @@ fun RaidReloadMaintenanceScreen(
                                 }
                             }
                             loadUrl("https://rockboys.netlify.app/topbar")
+                            onTopbarWebViewCreated(this)
                         }
                     },
                     update = { view ->
                         if (view is TouchPassThroughWebView) {
                             view.isOverlayActive = isTopbarOverlayActive
                             view.topBarHeightPx = totalActiveHeight
+                            
+                            val topbarInterface = view.tag as? TopbarAppInterface
+                            if (topbarInterface != null) {
+                                topbarInterface.onOverlayStateChanged = { active ->
+                                    (context as? android.app.Activity)?.runOnUiThread {
+                                        isTopbarOverlayActive = active
+                                    }
+                                }
+                                topbarInterface.onNavigateToUrl = { url ->
+                                    (context as? android.app.Activity)?.runOnUiThread {
+                                        isTopbarOverlayActive = false
+                                        webViewInstance?.loadUrl(url)
+                                        onCloseRequest()
+                                    }
+                                }
+                            }
                         }
                     }
                 )
@@ -2322,8 +2347,8 @@ fun ForceUpdateScreen(
 }
 
 class TopbarAppInterface(
-    private val onOverlayStateChanged: (Boolean) -> Unit,
-    private val onNavigateToUrl: (String) -> Unit
+    var onOverlayStateChanged: (Boolean) -> Unit,
+    var onNavigateToUrl: (String) -> Unit
 ) {
     @android.webkit.JavascriptInterface
     fun setOverlayActive(active: Boolean) {
