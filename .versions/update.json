@@ -1,7 +1,7 @@
 {
   "versionCode": 65,
   "versionName": "1.8.6",
-  "changeLog": "Implemented real-time bidirectional navigation bridge between Topbar WebView and main Home WebView. Searching players, clans, or clicking verified profiles inside the Raid Reload tool now switches seamlessly back to the Home board and loads the corresponding target page.",
+  "changeLog": "feat: add bidirectional navigation bridge\n\nImplement a bridge between Topbar and Home WebViews to enable seamless navigation when interacting with Raid Reload tool elements like player or clan profiles. Bump version to 1.8.6.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
