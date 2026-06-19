@@ -78,7 +78,6 @@ fun GameWebView(
     
     // WebView reference and states
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
-    var topbarWebViewInstance by remember { mutableStateOf<WebView?>(null) }
     var hasNavigatedFromHome by remember { mutableStateOf(false) }
     val isInitiallyConnected = remember {
         try {
@@ -721,8 +720,6 @@ fun GameWebView(
             ) {
                 RaidReloadMaintenanceScreen(
                     webViewInstance = webViewInstance,
-                    topbarWebViewInstance = topbarWebViewInstance,
-                    onTopbarWebViewCreated = { topbarWebViewInstance = it },
                     onCloseRequest = { isRaidReloadActive = false }
                 )
             }
@@ -1181,8 +1178,6 @@ fun Clash3DButton(
 @Composable
 fun RaidReloadMaintenanceScreen(
     webViewInstance: WebView?,
-    topbarWebViewInstance: WebView?,
-    onTopbarWebViewCreated: (WebView) -> Unit,
     onCloseRequest: () -> Unit
 ) {
     val context = LocalContext.current
@@ -1913,7 +1908,7 @@ fun RaidReloadMaintenanceScreen(
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
-                        topbarWebViewInstance ?: TouchPassThroughWebView(ctx).apply {
+                        TouchPassThroughWebView(ctx).apply {
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -2038,7 +2033,6 @@ fun RaidReloadMaintenanceScreen(
                                 }
                             }
                             loadUrl("https://rockboys.netlify.app/topbar")
-                            onTopbarWebViewCreated(this)
                         }
                     },
                     update = { view ->
