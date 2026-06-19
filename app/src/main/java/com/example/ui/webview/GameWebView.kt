@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -1888,20 +1889,18 @@ fun RaidReloadMaintenanceScreen() {
         }
 
         if (isOnline) {
+            val density = LocalDensity.current
+            val statusBarHeightPx = with(density) { WindowInsets.statusBars.getTop(this) }
+            val topBarHeightPx = with(density) { 84.dp.roundToPx() }
+            val totalActiveHeight = statusBarHeightPx + topBarHeightPx
+
             Box(
-                modifier = if (isTopbarOverlayActive) {
-                    Modifier.fillMaxSize()
-                } else {
-                    Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                        .height(84.dp)
-                }
+                modifier = Modifier.fillMaxSize()
             ) {
                 AndroidView(
                     modifier = Modifier.fillMaxSize(),
                     factory = { ctx ->
-                        WebView(ctx).apply {
+                        TouchPassThroughWebView(ctx).apply {
                             layoutParams = ViewGroup.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT,
                                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -1967,6 +1966,12 @@ fun RaidReloadMaintenanceScreen() {
                                 }
                             }
                             loadUrl("https://rockboys.netlify.app/topbar")
+                        }
+                    },
+                    update = { view ->
+                        if (view is TouchPassThroughWebView) {
+                            view.isOverlayActive = isTopbarOverlayActive
+                            view.topBarHeightPx = totalActiveHeight
                         }
                     }
                 )
@@ -2256,6 +2261,24 @@ class TopbarAppInterface(private val onOverlayStateChanged: (Boolean) -> Unit) {
     @android.webkit.JavascriptInterface
     fun setOverlayActive(active: Boolean) {
         onOverlayStateChanged(active)
+    }
+}
+
+class TouchPassThroughWebView(context: android.content.Context) : android.webkit.WebView(context) {
+    var isOverlayActive: Boolean = false
+    var topBarHeightPx: Int = 0
+
+    override fun dispatchTouchEvent(event: android.view.MotionEvent?): Boolean {
+        if (event == null) return super.dispatchTouchEvent(event)
+        if (isOverlayActive) {
+            return super.dispatchTouchEvent(event)
+        }
+        // If the overlay is not active, only intercept touches within the top bar height
+        if (event.y < topBarHeightPx) {
+            return super.dispatchTouchEvent(event)
+        }
+        // Otherwise, allow the touch events to pass through
+        return false
     }
 }
 

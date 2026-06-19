@@ -1,7 +1,7 @@
 {
-  "versionCode": 61,
-  "versionName": "1.8.4",
-  "changeLog": "Aligned website topbar wood banner natively at absolute top edge, and added real-time JavaScript MutationObserver bridge to handle full-screen sidebar drawers and search modals without clipping.",
+  "versionCode": 63,
+  "versionName": "1.8.5",
+  "changeLog": "Configured website topbar WebView as a full-screen transparent overlay with touch pass-through. Modals, search drawers and sidebar overlays render cleanly in full-screen on top of native layout, while native UI gestures pass through flawlessly when overlays are closed.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

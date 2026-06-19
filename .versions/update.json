@@ -1,7 +1,7 @@
 {
-  "versionCode": 61,
-  "versionName": "1.8.4",
-  "changeLog": "chore: bump version to 1.8.4\n\nOptimize WebView header alignment and implement MutationObserver for improved full-screen modal handling.",
+  "versionCode": 63,
+  "versionName": "1.8.5",
+  "changeLog": "Configured website topbar WebView as a full-screen transparent overlay with touch pass-through. Modals, search drawers and sidebar overlays render cleanly in full-screen on top of native layout, while native UI gestures pass through flawlessly when overlays are closed.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
