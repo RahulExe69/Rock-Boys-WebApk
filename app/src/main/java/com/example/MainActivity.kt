@@ -37,6 +37,13 @@ class MainActivity : ComponentActivity() {
         isBottomBarVisible = visible
     }
 
+    var isRaidReloadActive by mutableStateOf(false)
+        private set
+
+    fun updateRaidReloadActive(active: Boolean) {
+        isRaidReloadActive = active
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Core Starting Window API setup - disappears immediately to hand control to Jetpack Compose
         installSplashScreen()
@@ -83,6 +90,8 @@ class MainActivity : ComponentActivity() {
                     GameWebView(
                         targetUrl = "https://rockboys.netlify.app",
                         isBottomBarVisible = isBottomBarVisible,
+                        isRaidReloadActive = isRaidReloadActive,
+                        onRaidReloadActiveChanged = { updateRaidReloadActive(it) },
                         onExitRequested = {
                             finish()
                         }
@@ -115,6 +124,134 @@ class WebAppInterface(private val activity: MainActivity) {
     fun setBottomBarVisibility(visible: Boolean) {
         activity.runOnUiThread {
             activity.updateBottomBarVisibility(visible)
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun hasOverlayPermission(): Boolean {
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            android.provider.Settings.canDrawOverlays(activity)
+        } else {
+            true
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun requestOverlayPermission() {
+        activity.runOnUiThread {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                val intent = android.content.Intent(
+                    android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    android.net.Uri.parse("package:${activity.packageName}")
+                )
+                activity.startActivity(intent)
+            } else {
+                android.widget.Toast.makeText(activity, "Overlay permission is granted by default.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun hasVpnPermission(): Boolean {
+        return android.net.VpnService.prepare(activity) == null
+    }
+
+    @android.webkit.JavascriptInterface
+    fun requestVpnPermission() {
+        activity.runOnUiThread {
+            val vpnIntent = android.net.VpnService.prepare(activity)
+            if (vpnIntent != null) {
+                activity.startActivity(vpnIntent)
+            } else {
+                android.widget.Toast.makeText(activity, "VPN authorization is already configured & authenticated.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun isFloatingButtonEnabled(): Boolean {
+        return com.example.ui.webview.RaidReloadSettings.isShieldEnabled(activity)
+    }
+
+    @android.webkit.JavascriptInterface
+    fun setFloatingButtonEnabled(enabled: Boolean) {
+        activity.runOnUiThread {
+            if (enabled && !hasOverlayPermission()) {
+                android.widget.Toast.makeText(activity, "System drawing overlay permission is required.", android.widget.Toast.LENGTH_LONG).show()
+                return@runOnUiThread
+            }
+
+            com.example.ui.webview.RaidReloadSettings.saveShieldEnabled(activity, enabled)
+            val serviceIntent = android.content.Intent(activity, com.example.ui.webview.FloatingShieldService::class.java)
+            if (enabled) {
+                com.example.ui.webview.FloatingShieldService.buttonSizeDp = com.example.ui.webview.RaidReloadSettings.getShieldSize(activity)
+                com.example.ui.webview.FloatingShieldService.idleTransparencyPercent = com.example.ui.webview.RaidReloadSettings.getShieldTransparency(activity)
+                activity.startService(serviceIntent)
+                android.widget.Toast.makeText(activity, "Floating reload tool activated!", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                activity.stopService(serviceIntent)
+                android.widget.Toast.makeText(activity, "Floating tool stopped.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun getFloatingButtonSize(): Int {
+        return com.example.ui.webview.RaidReloadSettings.getShieldSize(activity)
+    }
+
+    @android.webkit.JavascriptInterface
+    fun setFloatingButtonSize(size: Int) {
+        activity.runOnUiThread {
+            com.example.ui.webview.RaidReloadSettings.saveShieldSize(activity, size)
+            com.example.ui.webview.FloatingShieldService.buttonSizeDp = size
+            if (isFloatingButtonEnabled() && com.example.ui.webview.FloatingShieldService.isServiceRunning) {
+                val updateIntent = android.content.Intent(activity, com.example.ui.webview.FloatingShieldService::class.java).apply {
+                    action = "UPDATE_STYLE"
+                }
+                activity.startService(updateIntent)
+            }
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun getFloatingButtonTransparency(): Int {
+        return com.example.ui.webview.RaidReloadSettings.getShieldTransparency(activity)
+    }
+
+    @android.webkit.JavascriptInterface
+    fun setFloatingButtonTransparency(transparency: Int) {
+        activity.runOnUiThread {
+            com.example.ui.webview.RaidReloadSettings.saveShieldTransparency(activity, transparency)
+            com.example.ui.webview.FloatingShieldService.idleTransparencyPercent = transparency
+            if (isFloatingButtonEnabled() && com.example.ui.webview.FloatingShieldService.isServiceRunning) {
+                val updateIntent = android.content.Intent(activity, com.example.ui.webview.FloatingShieldService::class.java).apply {
+                    action = "UPDATE_STYLE"
+                }
+                activity.startService(updateIntent)
+            }
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun centerFloatingButton() {
+        activity.runOnUiThread {
+            if (isFloatingButtonEnabled() && com.example.ui.webview.FloatingShieldService.isServiceRunning) {
+                val stopIntent = android.content.Intent(activity, com.example.ui.webview.FloatingShieldService::class.java)
+                activity.stopService(stopIntent)
+                val startIntent = android.content.Intent(activity, com.example.ui.webview.FloatingShieldService::class.java)
+                activity.startService(startIntent)
+                android.widget.Toast.makeText(activity, "Floating icon recentered", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                android.widget.Toast.makeText(activity, "Activate Floating Shield to configure position", android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    @android.webkit.JavascriptInterface
+    fun setNativeRaidReloadActive(active: Boolean) {
+        activity.runOnUiThread {
+            activity.updateRaidReloadActive(active)
         }
     }
 }

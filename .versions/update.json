@@ -1,7 +1,7 @@
 {
-  "versionCode": 69,
-  "versionName": "1.8.8",
-  "changeLog": "build: bump version to 1.8.8 and refactor RaidReload UI\n\n- Increment versionCode to 69 and versionName to 1.8.8\n- Clean up unused topbar WebView instances in RaidReloadMaintenanceScreen\n- Optimize RaidReload WebView initialization logic",
+  "versionCode": 67,
+  "versionName": "1.8.7",
+  "changeLog": "Resolved layout scrolling issues for Raid Reload, added auto-persisted Topbar state caching to eliminate loading spinners, limited overlay sizing strictly above the bottom bar, and adjusted dynamic home dashboard landing full screen transitions.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }

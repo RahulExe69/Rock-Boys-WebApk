@@ -69,6 +69,8 @@ import com.example.network.NetworkMonitor
 fun GameWebView(
     targetUrl: String = "https://rockboys.netlify.app",
     isBottomBarVisible: Boolean = false,
+    isRaidReloadActive: Boolean = false,
+    onRaidReloadActiveChanged: (Boolean) -> Unit = {},
     onExitRequested: () -> Unit,
     onPageLoaded: () -> Unit = {}
 ) {
@@ -97,8 +99,7 @@ fun GameWebView(
     // Exit validation confirmation dialog
     var showExitDialog by remember { mutableStateOf(false) }
 
-    // State for temporary Raid Reload under maintenance screen
-    var isRaidReloadActive by remember { mutableStateOf(false) }
+    // State for temporary Raid Reload under maintenance screen is now controlled by the parent activity
 
     // Force Update overlay state
     var showForceUpdateScreen by remember { mutableStateOf(false) }
@@ -175,7 +176,7 @@ fun GameWebView(
         if (showForceUpdateScreen) {
             Toast.makeText(context, "A mandatory update is required to proceed.", Toast.LENGTH_SHORT).show()
         } else if (isRaidReloadActive) {
-            isRaidReloadActive = false
+            onRaidReloadActiveChanged(false)
         } else {
             val webView = webViewInstance
             if (webView != null && webView.canGoBack()) {
@@ -188,122 +189,7 @@ fun GameWebView(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = Color.Transparent,
-        bottomBar = {
-            AnimatedVisibility(
-                visible = isBottomBarVisible && !showForceUpdateScreen,
-                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
-                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .shadow(
-                            elevation = 16.dp,
-                            clip = false
-                        )
-                        .background(
-                            color = Color(0xFFEAD8C3)
-                        )
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        .height(72.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 24.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Options 1: HOME Tab (loads the target URL dashboard)
-                        val item1Selected = !isRaidReloadActive
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
-                                .clickable {
-                                    isRaidReloadActive = false
-                                }
-                                .padding(vertical = 2.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            // Selected capsule pill indicator backdrop
-                            Box(
-                                modifier = Modifier
-                                    .width(56.dp)
-                                    .height(28.dp)
-                                    .background(
-                                        color = if (item1Selected) Color(0xFFF7D5C8) else Color.Transparent,
-                                        shape = RoundedCornerShape(percent = 50)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Home,
-                                    contentDescription = "Home",
-                                    tint = if (item1Selected) Color(0xFF3C2414) else Color(0xFF3C2414).copy(alpha = 0.62f),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(2.dp))
-                            
-                            Text(
-                                text = "Home",
-                                color = if (item1Selected) Color(0xFF3C2414) else Color(0xFF3C2414).copy(alpha = 0.62f),
-                                fontSize = 11.sp,
-                                fontWeight = if (item1Selected) FontWeight.Bold else FontWeight.Medium,
-                                letterSpacing = 0.3.sp
-                            )
-                        }
-
-                        // Options 2: RAID RELOAD Tab (Opens the custom interactive under maintenance page)
-                        val item2Selected = isRaidReloadActive
-                        Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(16.dp))
-                                .clickable {
-                                    isRaidReloadActive = true
-                                }
-                                .padding(vertical = 2.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            // Selected capsule pill indicator backdrop
-                            Box(
-                                modifier = Modifier
-                                    .width(56.dp)
-                                    .height(28.dp)
-                                    .background(
-                                        color = if (item2Selected) Color(0xFFF7D5C8) else Color.Transparent,
-                                        shape = RoundedCornerShape(percent = 50)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = "Raid Reload",
-                                    tint = if (item2Selected) Color(0xFF3C2414) else Color(0xFF3C2414).copy(alpha = 0.62f),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(2.dp))
-                            
-                            Text(
-                                text = "Raid Reload Tool",
-                                color = if (item2Selected) Color(0xFF3C2414) else Color(0xFF3C2414).copy(alpha = 0.62f),
-                                fontSize = 11.sp,
-                                fontWeight = if (item2Selected) FontWeight.Bold else FontWeight.Medium,
-                                letterSpacing = 0.3.sp
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -720,7 +606,7 @@ fun GameWebView(
             ) {
                 RaidReloadMaintenanceScreen(
                     webViewInstance = webViewInstance,
-                    onCloseRequest = { isRaidReloadActive = false }
+                    onCloseRequest = { onRaidReloadActiveChanged(false) }
                 )
             }
 

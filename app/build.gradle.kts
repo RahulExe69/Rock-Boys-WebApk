@@ -36,8 +36,8 @@ android {
     applicationId = "com.rockboys.exe"
     minSdk = 24
     targetSdk = 36
-    versionCode = 69
-    versionName = "1.8.8"
+    versionCode = 71
+    versionName = "1.8.9"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
