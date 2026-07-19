@@ -233,6 +233,7 @@ fun GameWebView(
                         // Add WebView Interface Handler to listen to bottom bar state transitions
                         val mainActivity = ctx as? MainActivity
                         if (mainActivity != null) {
+                            mainActivity.mainWebView = this
                             addJavascriptInterface(WebAppInterface(mainActivity), "Android")
                         }
                         

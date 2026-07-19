@@ -29,6 +29,39 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private lateinit var networkMonitor: NetworkMonitor
     
+    // Webview reference to evaluate callback scripts directly
+    var mainWebView: android.webkit.WebView? = null
+
+    // Register a standard Activity Result Launcher to track VPN authorization results reliably
+    val vpnLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val granted = result.resultCode == android.app.Activity.RESULT_OK
+        notifyVpnPermission(granted)
+        if (granted) {
+            Toast.makeText(this, "VPN authorization granted!", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this, "VPN authorization denied.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun notifyVpnPermission(granted: Boolean) {
+        runOnUiThread {
+            mainWebView?.evaluateJavascript("javascript:if(window.onVpnPermissionResult) { window.onVpnPermissionResult($granted); }", null)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Automatically monitor and update system overlay permission on resume
+        val hasOverlay = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            android.provider.Settings.canDrawOverlays(this)
+        } else {
+            true
+        }
+        mainWebView?.evaluateJavascript("javascript:if(window.onOverlayPermissionResult) { window.onOverlayPermissionResult($hasOverlay); }", null)
+    }
+
     // State to toggle bottom bar visibility dynamically via Javascript Interface
     var isBottomBarVisible by mutableStateOf(false)
         private set
@@ -161,9 +194,10 @@ class WebAppInterface(private val activity: MainActivity) {
         activity.runOnUiThread {
             val vpnIntent = android.net.VpnService.prepare(activity)
             if (vpnIntent != null) {
-                activity.startActivity(vpnIntent)
+                activity.vpnLauncher.launch(vpnIntent)
             } else {
                 android.widget.Toast.makeText(activity, "VPN authorization is already configured & authenticated.", android.widget.Toast.LENGTH_SHORT).show()
+                activity.notifyVpnPermission(true)
             }
         }
     }

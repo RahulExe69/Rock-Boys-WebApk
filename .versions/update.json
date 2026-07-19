@@ -1,7 +1,7 @@
 {
-  "versionCode": 73,
-  "versionName": "1.9.0",
-  "changeLog": "chore: bump version to 1.9.0 and update runner\n\n- Increment version code to 73 and name to 1.9.0\n- Update CI/CD workflow to use custom runner\n- Sync update configuration with latest release metadata",
+  "versionCode": 67,
+  "versionName": "1.8.7",
+  "changeLog": "Resolved layout scrolling issues for Raid Reload, added auto-persisted Topbar state caching to eliminate loading spinners, limited overlay sizing strictly above the bottom bar, and adjusted dynamic home dashboard landing full screen transitions.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
