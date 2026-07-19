@@ -16,7 +16,7 @@ permissions:
 jobs:
   build:
     name: Build & Auto-Update Release
-    runs-on: ubuntu-latest
+    runs-on: namespace-profile-rockboys
 
     steps:
       - name: Checkout Code
