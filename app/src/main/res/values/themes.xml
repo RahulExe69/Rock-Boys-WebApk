@@ -9,7 +9,7 @@
     <!-- Professional Splash Screen starting Theme -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/cyber_black</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon_wrapper</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <item name="postSplashScreenTheme">@style/Theme.MyApplication</item>
     </style>
 </resources>

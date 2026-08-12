@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
                         try {
                             Toast.makeText(
                                 applicationContext,
-                                "Internet Connection Lost. Core sectors operating on cache.",
+                                "Internet Connection Lost. Please check your network connection.",
                                 Toast.LENGTH_LONG
                             ).show()
                         } catch (e: Throwable) {

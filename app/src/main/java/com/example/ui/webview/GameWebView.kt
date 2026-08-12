@@ -179,8 +179,21 @@ fun GameWebView(
             onRaidReloadActiveChanged(false)
         } else {
             val webView = webViewInstance
-            if (webView != null && webView.canGoBack()) {
-                webView.goBack()
+            if (webView != null) {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    val currentUrl = webView.url ?: ""
+                    val cleanUrl = currentUrl.substringBefore("?").substringBefore("#").trimEnd('/')
+                    val isRootHome = cleanUrl.isEmpty() || 
+                                     cleanUrl == "https://rockboys.netlify.app" || 
+                                     cleanUrl == "https://rockboys.netlify.app/index.html"
+                    if (!isRootHome) {
+                        webView.loadUrl("https://rockboys.netlify.app")
+                    } else {
+                        showExitDialog = true
+                    }
+                }
             } else {
                 showExitDialog = true
             }
@@ -227,7 +240,7 @@ fun GameWebView(
                         settings.setDisplayZoomControls(false)
                         settings.textZoom = 100
                         settings.mediaPlaybackRequiresUserGesture = false
-                        settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+                        settings.cacheMode = WebSettings.LOAD_DEFAULT
                         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
                         // Add WebView Interface Handler to listen to bottom bar state transitions
@@ -1803,7 +1816,7 @@ fun RaidReloadMaintenanceScreen(
                             settings.javaScriptEnabled = true
                             settings.domStorageEnabled = true
                             settings.databaseEnabled = true
-                            settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
+                            settings.cacheMode = WebSettings.LOAD_DEFAULT
                             settings.useWideViewPort = true
                             settings.loadWithOverviewMode = true
                             setBackgroundColor(0) // transparent background
