@@ -1,7 +1,7 @@
 {
-  "versionCode": 81,
-  "versionName": "1.9.4",
-  "changeLog": "chore: bump version to 1.9.4 and revert workflow runner\n\nRevert GitHub Actions runner to ubuntu-latest and update app version metadata.",
+  "versionCode": 83,
+  "versionName": "1.9.5",
+  "changeLog": "Fixed known issues. Integrated 1-second app opening intro sound to automatically trigger right after the launch screen icon disappears.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
