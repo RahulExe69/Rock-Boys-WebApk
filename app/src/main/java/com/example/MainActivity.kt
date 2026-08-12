@@ -5,7 +5,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import android.media.MediaPlayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -112,25 +111,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MyApplicationTheme {
-                val context = LocalContext.current
                 // Reactive Compose-level custom splash screen layer shown for exactly 1.2s minimum
                 var splashActive by remember { mutableStateOf(true) }
                 
                 LaunchedEffect(Unit) {
                     delay(1200)
                     splashActive = false
-                    try {
-                        val soundId = context.resources.getIdentifier("app_opening_sound", "raw", context.packageName)
-                        if (soundId != 0) {
-                            val mediaPlayer: android.media.MediaPlayer? = android.media.MediaPlayer.create(context, soundId)
-                            mediaPlayer?.setOnCompletionListener { mp ->
-                                mp.release()
-                            }
-                            mediaPlayer?.start()
-                        }
-                    } catch (e: Throwable) {
-                        e.printStackTrace()
-                    }
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
