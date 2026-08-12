@@ -1,7 +1,7 @@
 {
-  "versionCode": 79,
-  "versionName": "1.9.3",
-  "changeLog": "Fixed known issues. Updated WebSettings cache policy to WebSettings.LOAD_DEFAULT to directly rely on website HTTP cache headers, configured native splash screen theme to display official APK logo on launch, and enhanced back button navigation to smoothly handle web page routing.",
+  "versionCode": 81,
+  "versionName": "1.9.4",
+  "changeLog": "Fixed known issues. Reverted GitHub Actions workflow runner back to standard default ubuntu-latest environment.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
