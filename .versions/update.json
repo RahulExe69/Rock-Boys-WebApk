@@ -1,7 +1,7 @@
 {
   "versionCode": 81,
   "versionName": "1.9.4",
-  "changeLog": "Fixed known issues. Reverted GitHub Actions workflow runner back to standard default ubuntu-latest environment.",
+  "changeLog": "build: revert to version 1.9.4 and disable R8\n\nRevert to version 1.9.4, restore previously commented-out dependencies, and disable R8 minification/resource shrinking to resolve stability issues. Also updated the CI workflow environment.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk",
   "forceUpdate": true
 }
