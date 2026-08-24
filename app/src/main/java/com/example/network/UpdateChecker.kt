@@ -1,8 +1,11 @@
 package com.example.network
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageInstaller
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import okhttp3.OkHttpClient
@@ -11,6 +14,7 @@ import org.json.JSONObject
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -27,7 +31,8 @@ data class DownloadProgressState(
     val bytesDownloaded: Long = 0L,
     val totalBytes: Long = 0L,
     val progress: Float = 0f,
-    val formattedProgress: String = ""
+    val formattedProgress: String = "",
+    val isInstalling: Boolean = false
 )
 
 object UpdateChecker {
@@ -66,7 +71,7 @@ object UpdateChecker {
     fun getRunningVersionCode(context: Context): Int {
         return try {
             val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 packageInfo.longVersionCode.toInt()
             } else {
                 @Suppress("DEPRECATION")
@@ -183,7 +188,7 @@ object UpdateChecker {
                     }
 
                     UpdateInfo(
-                        versionCode = 0, // Semantic versioning comparison is preferred
+                        versionCode = 0,
                         versionName = versionName,
                         changeLog = changeLog,
                         apkUrl = apkUrl,
@@ -267,7 +272,8 @@ object UpdateChecker {
                             bytesDownloaded = 0L,
                             totalBytes = totalBytes,
                             progress = 0.01f,
-                            formattedProgress = if (totalBytes > 0) "0 B / ${formatBytes(totalBytes)}" else "Starting download..."
+                            formattedProgress = if (totalBytes > 0) "0 B / ${formatBytes(totalBytes)}" else "Starting download...",
+                            isInstalling = false
                         )
                     )
 
@@ -299,7 +305,8 @@ object UpdateChecker {
                                             bytesDownloaded = bytesDownloaded,
                                             totalBytes = totalBytes,
                                             progress = progress,
-                                            formattedProgress = formatted
+                                            formattedProgress = formatted,
+                                            isInstalling = false
                                         )
                                     )
                                 }
@@ -316,13 +323,66 @@ object UpdateChecker {
         }
     }
 
+    /**
+     * Seamless In-App PackageInstaller Session installation (Lucky Patcher / Modern Android style).
+     * Falls back gracefully to FileProvider Intent if needed.
+     */
     fun installApk(context: Context, apkFile: File) {
         try {
-            if (!apkFile.exists()) {
+            if (!apkFile.exists() || apkFile.length() <= 0) {
                 Toast.makeText(context, "Installer file not found!", Toast.LENGTH_SHORT).show()
                 return
             }
 
+            val packageInstaller = context.packageManager.packageInstaller
+            val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_REQUIRED)
+                }
+            }
+
+            val sessionId = packageInstaller.createSession(params)
+            val session = packageInstaller.openSession(sessionId)
+
+            FileInputStream(apkFile).use { inputStream ->
+                session.openWrite("rockboys_update_$sessionId", 0, apkFile.length()).use { outputStream ->
+                    val buffer = ByteArray(64 * 1024)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        outputStream.write(buffer, 0, bytesRead)
+                    }
+                    session.fsync(outputStream)
+                }
+            }
+
+            val intent = Intent(context, InstallReceiver::class.java).apply {
+                action = InstallReceiver.ACTION_INSTALL_STATUS
+            }
+
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                sessionId,
+                intent,
+                flags
+            )
+
+            session.commit(pendingIntent.intentSender)
+            session.close()
+            Log.d(TAG, "PackageInstaller session committed with sessionId: $sessionId")
+        } catch (e: Throwable) {
+            Log.w(TAG, "PackageInstaller session failed, using standard installer fallback: ${e.message}")
+            fallbackInstallWithFileProvider(context, apkFile)
+        }
+    }
+
+    private fun fallbackInstallWithFileProvider(context: Context, apkFile: File) {
+        try {
             val authority = "${context.packageName}.fileprovider"
             val uri = androidx.core.content.FileProvider.getUriForFile(
                 context,

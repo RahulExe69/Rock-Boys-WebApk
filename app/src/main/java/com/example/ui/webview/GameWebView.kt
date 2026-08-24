@@ -663,7 +663,11 @@ fun GameWebView(
                                             downloadProgressState = state
                                         }
                                         if (downloadSuccess) {
-                                            isDownloading = false
+                                            downloadProgressState = com.example.network.DownloadProgressState(
+                                                progress = 1f,
+                                                formattedProgress = "Installing update...",
+                                                isInstalling = true
+                                            )
                                             com.example.network.UpdateChecker.installApk(context, apkFile)
                                         } else {
                                             isDownloading = false
@@ -2153,6 +2157,7 @@ fun ForceUpdateScreen(
 
                 // Action download / install controls
                 if (isDownloading) {
+                    val isInstalling = downloadState?.isInstalling == true
                     val progressVal = downloadState?.progress ?: 0f
                     val percentageInt = (progressVal * 100).toInt().coerceIn(0, 100)
                     val sizeStatusText = downloadState?.formattedProgress ?: "Connecting to high-speed server..."
@@ -2167,14 +2172,14 @@ fun ForceUpdateScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "DOWNLOADING UPDATE",
+                                text = if (isInstalling) "INSTALLING UPDATE" else "DOWNLOADING UPDATE",
                                 color = Color(0xFF4C473E),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Black,
                                 letterSpacing = 0.5.sp
                             )
                             Text(
-                                text = "$percentageInt%",
+                                text = if (isInstalling) "Applying..." else "$percentageInt%",
                                 color = Color(0xFF28650A),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Black
@@ -2194,7 +2199,7 @@ fun ForceUpdateScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .fillMaxWidth(progressVal.coerceIn(0f, 1f))
+                                    .fillMaxWidth(if (isInstalling) 1f else progressVal.coerceIn(0f, 1f))
                                     .background(
                                         brush = Brush.verticalGradient(
                                             colors = listOf(cocGreenLight, cocGreen)
@@ -2219,7 +2224,7 @@ fun ForceUpdateScreen(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "High-speed direct stream",
+                                text = if (isInstalling) "Package session staging" else "High-speed direct stream",
                                 color = Color(0xFF807A70),
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Medium
