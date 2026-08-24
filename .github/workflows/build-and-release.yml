@@ -118,7 +118,7 @@ jobs:
           data['versionCode'] = version_code
           data['versionName'] = version_name
           data['changeLog'] = commit_msg
-          data['apkUrl'] = "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk"
+          data['apkUrl'] = f"https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v{version_name}/app-release.apk"
           if 'forceUpdate' not in data:
               data['forceUpdate'] = True
 
@@ -126,14 +126,20 @@ jobs:
           os.makedirs(os.path.dirname(version_json_path), exist_ok=True)
           with open(version_json_path, 'w', encoding='utf-8') as f:
               json.dump(data, f, indent=2, ensure_ascii=False)
-          print(f"Successfully synchronized {version_json_path} to version {version_name} ({version_code})")
+          
+          # Also sync backup version.json
+          backup_path = '.versions/version.json'
+          with open(backup_path, 'w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+              
+          print(f"Successfully synchronized {version_json_path} and {backup_path} to version {version_name} ({version_code})")
 
       - name: Commit and Push Release Updates
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add .versions/update.json .build-outputs/app-release.apk
+          git add .versions/update.json .versions/version.json .build-outputs/app-release.apk
           
           # Check if there are changes to commit
           if git diff-index --quiet HEAD --; then
@@ -142,3 +148,20 @@ jobs:
             git commit -m "Automated build & release: update APK and update.json to v$(python -c "import json; print(json.load(open('.versions/update.json'))['versionName'])") [skip ci]"
             git push origin main
           fi
+
+      - name: Publish High-Speed GitHub Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION_NAME=$(python -c "import json; print(json.load(open('.versions/update.json'))['versionName'])")
+          TAG="v${VERSION_NAME}"
+          echo "Publishing automated GitHub Release for $TAG..."
+
+          # Remove existing release/tag with same name if workflow was re-run
+          gh release delete "$TAG" --yes --cleanup-tag || true
+
+          # Create release and upload APK as primary asset with latest tag
+          gh release create "$TAG" .build-outputs/app-release.apk \
+            --title "Rock Boys App v${VERSION_NAME}" \
+            --notes "Automated build and release for Rock Boys v${VERSION_NAME}. High-speed edge CDN asset." \
+            --latest

@@ -8,8 +8,12 @@ import android.widget.Toast
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.IOException
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 data class UpdateInfo(
     val versionCode: Int,
@@ -17,6 +21,13 @@ data class UpdateInfo(
     val changeLog: String,
     val apkUrl: String,
     val forceUpdate: Boolean
+)
+
+data class DownloadProgressState(
+    val bytesDownloaded: Long = 0L,
+    val totalBytes: Long = 0L,
+    val progress: Float = 0f,
+    val formattedProgress: String = ""
 )
 
 object UpdateChecker {
@@ -30,7 +41,29 @@ object UpdateChecker {
 
     private const val UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/update.json"
     private const val BACKUP_UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/version.json"
-    private val client by lazy { OkHttpClient() }
+    private const val FALLBACK_RAW_APK_URL = "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk"
+
+    private val client by lazy {
+        OkHttpClient.Builder()
+            .connectTimeout(25, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .followRedirects(true)
+            .followSslRedirects(true)
+            .build()
+    }
+
+    fun formatBytes(bytes: Long): String {
+        if (bytes <= 0) return "0 B"
+        val kb = bytes / 1024.0
+        val mb = kb / 1024.0
+        val gb = mb / 1024.0
+        return when {
+            gb >= 1.0 -> String.format(Locale.US, "%.2f GB", gb)
+            mb >= 1.0 -> String.format(Locale.US, "%.1f MB", mb)
+            kb >= 1.0 -> String.format(Locale.US, "%.0f KB", kb)
+            else -> "$bytes B"
+        }
+    }
 
     fun getRunningVersionCode(context: Context): Int {
         return try {
@@ -116,49 +149,101 @@ object UpdateChecker {
     suspend fun downloadApk(
         urlString: String,
         targetFile: File,
-        onProgress: (Float) -> Unit
+        onProgress: (DownloadProgressState) -> Unit
     ): Boolean {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            try {
-                targetFile.parentFile?.mkdirs()
-                if (targetFile.exists()) {
-                    targetFile.delete()
+            // Adaptive buffer tiers: 256 KB primary high-speed, then 64 KB, then 32 KB fallback
+            val bufferSizes = listOf(256 * 1024, 64 * 1024, 32 * 1024)
+            val urlsToTry = if (urlString.isNotBlank() && urlString != FALLBACK_RAW_APK_URL) {
+                listOf(urlString, FALLBACK_RAW_APK_URL)
+            } else {
+                listOf(urlString)
+            }
+
+            for (currentUrl in urlsToTry) {
+                for (bufSize in bufferSizes) {
+                    Log.d(TAG, "Starting high-speed download from $currentUrl with buffer size: ${bufSize / 1024} KB")
+                    val success = executeDownloadStream(currentUrl, targetFile, bufSize, onProgress)
+                    if (success) {
+                        Log.d(TAG, "Download successfully completed using ${bufSize / 1024} KB buffer.")
+                        return@withContext true
+                    }
+                    Log.w(TAG, "Download attempt failed with buffer ${bufSize / 1024} KB. Attempting graceful adaptive fallback...")
+                }
+            }
+            false
+        }
+    }
+
+    private fun executeDownloadStream(
+        urlString: String,
+        targetFile: File,
+        bufferSize: Int,
+        onProgress: (DownloadProgressState) -> Unit
+    ): Boolean {
+        try {
+            targetFile.parentFile?.mkdirs()
+            if (targetFile.exists()) {
+                targetFile.delete()
+            }
+
+            val request = Request.Builder()
+                .url(urlString)
+                .header("User-Agent", "RockBoys-Android-Updater")
+                .header("Accept-Encoding", "identity")
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Log.e(TAG, "Download request returned HTTP ${response.code} for $urlString")
+                    return false
                 }
 
-                val request = Request.Builder()
-                    .url(urlString)
-                    .build()
+                val body = response.body ?: return false
+                val totalBytes = body.contentLength()
+                var bytesDownloaded = 0L
+                var lastUiUpdateTime = 0L
 
-                client.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) {
-                        Log.e(TAG, "Download failed, response code: ${response.code}")
-                        return@withContext false
-                    }
+                BufferedInputStream(body.byteStream(), bufferSize).use { inputStream ->
+                    BufferedOutputStream(targetFile.outputStream(), bufferSize).use { outputStream ->
+                        val buffer = ByteArray(bufferSize)
+                        var bytesRead: Int
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            outputStream.write(buffer, 0, bytesRead)
+                            bytesDownloaded += bytesRead
 
-                    val body = response.body ?: return@withContext false
-                    val totalBytes = body.contentLength()
-                    var bytesDownloaded = 0L
-
-                    body.byteStream().use { inputStream ->
-                        targetFile.outputStream().use { outputStream ->
-                            val buffer = ByteArray(8192)
-                            var bytesRead: Int
-                            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                                outputStream.write(buffer, 0, bytesRead)
-                                bytesDownloaded += bytesRead
-                                if (totalBytes > 0) {
-                                    val progress = bytesDownloaded.toFloat() / totalBytes
-                                    onProgress(progress)
+                            val now = System.currentTimeMillis()
+                            // Dispatch UI progress smoothly without overloading Compose threads
+                            if (now - lastUiUpdateTime > 50 || bytesDownloaded == totalBytes) {
+                                lastUiUpdateTime = now
+                                val progress = if (totalBytes > 0) {
+                                    (bytesDownloaded.toFloat() / totalBytes).coerceIn(0f, 1f)
+                                } else {
+                                    0f
                                 }
+                                val formatted = if (totalBytes > 0) {
+                                    "${formatBytes(bytesDownloaded)} / ${formatBytes(totalBytes)}"
+                                } else {
+                                    "${formatBytes(bytesDownloaded)} downloaded"
+                                }
+                                onProgress(
+                                    DownloadProgressState(
+                                        bytesDownloaded = bytesDownloaded,
+                                        totalBytes = totalBytes,
+                                        progress = progress,
+                                        formattedProgress = formatted
+                                    )
+                                )
                             }
                         }
+                        outputStream.flush()
                     }
                 }
-                true
-            } catch (e: Throwable) {
-                Log.e(TAG, "Exception during APK download", e)
-                false
             }
+            return targetFile.exists() && targetFile.length() > 0
+        } catch (e: Throwable) {
+            Log.e(TAG, "Stream exception during APK download with buffer size $bufferSize", e)
+            return false
         }
     }
 

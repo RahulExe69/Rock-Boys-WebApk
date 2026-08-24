@@ -107,7 +107,7 @@ fun GameWebView(
     var isCheckingUpdate by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var isDownloading by remember { mutableStateOf(false) }
-    var downloadProgress by remember { mutableStateOf<Float?>(null) }
+    var downloadProgressState by remember { mutableStateOf<com.example.network.DownloadProgressState?>(null) }
     var downloadError by remember { mutableStateOf<String?>(null) }
 
     // Check for raw Github dynamic force updates on startup
@@ -637,12 +637,17 @@ fun GameWebView(
                         currentVersion = runningVersionName,
                         updateInfo = updateInfo,
                         isDownloading = isDownloading,
-                        downloadProgress = downloadProgress,
+                        downloadState = downloadProgressState,
                         downloadError = downloadError,
                         onUpgradeClick = {
                             if (!isDownloading) {
                                 isDownloading = true
-                                downloadProgress = 0f
+                                downloadProgressState = com.example.network.DownloadProgressState(
+                                    bytesDownloaded = 0L,
+                                    totalBytes = 0L,
+                                    progress = 0f,
+                                    formattedProgress = "Connecting..."
+                                )
                                 downloadError = null
                                 coroutineScope.launch {
                                     try {
@@ -650,8 +655,8 @@ fun GameWebView(
                                         val downloadSuccess = com.example.network.UpdateChecker.downloadApk(
                                             updateInfo.apkUrl,
                                             apkFile
-                                        ) { progress ->
-                                            downloadProgress = progress
+                                        ) { state ->
+                                            downloadProgressState = state
                                         }
                                         if (downloadSuccess) {
                                             isDownloading = false
@@ -1969,7 +1974,7 @@ fun ForceUpdateScreen(
     currentVersion: String,
     updateInfo: com.example.network.UpdateInfo,
     isDownloading: Boolean,
-    downloadProgress: Float?,
+    downloadState: com.example.network.DownloadProgressState?,
     downloadError: String?,
     onUpgradeClick: () -> Unit
 ) {
@@ -2144,19 +2149,33 @@ fun ForceUpdateScreen(
 
                 // Action download / install controls
                 if (isDownloading) {
-                    val progressVal = downloadProgress ?: 0f
-                    val percentageStr = (progressVal * 100).toInt().toString()
+                    val progressVal = downloadState?.progress ?: 0f
+                    val percentageInt = (progressVal * 100).toInt().coerceIn(0, 100)
+                    val sizeStatusText = downloadState?.formattedProgress ?: "Connecting to high-speed server..."
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = "DOWNLOADING UPDATE... $percentageStr%",
-                            color = Color(0xFF4C473E),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 0.5.sp
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "DOWNLOADING UPDATE",
+                                color = Color(0xFF4C473E),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.5.sp
+                            )
+                            Text(
+                                text = "$percentageInt%",
+                                color = Color(0xFF28650A),
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(8.dp))
 
@@ -2164,31 +2183,44 @@ fun ForceUpdateScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(16.dp)
-                                .background(Color(0xFFD4D0C5), shape = RoundedCornerShape(8.dp))
-                                .border(width = 1.5.dp, color = Color(0xFF908C80), shape = RoundedCornerShape(8.dp))
+                                .height(18.dp)
+                                .background(Color(0xFFD4D0C5), shape = RoundedCornerShape(9.dp))
+                                .border(width = 1.5.dp, color = Color(0xFF908C80), shape = RoundedCornerShape(9.dp))
                         ) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxHeight()
-                                    .fillMaxWidth(progressVal)
+                                    .fillMaxWidth(progressVal.coerceIn(0f, 1f))
                                     .background(
                                         brush = Brush.verticalGradient(
                                             colors = listOf(cocGreenLight, cocGreen)
                                         ),
-                                        shape = RoundedCornerShape(8.dp)
+                                        shape = RoundedCornerShape(9.dp)
                                     )
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                        Text(
-                            text = "Installing automatically upon success",
-                            color = Color(0xFF807A70),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium
-                        )
+                        // Live Downloaded Size vs Total Size
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = sizeStatusText,
+                                color = Color(0xFF5E544A),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "High-speed direct stream",
+                                color = Color(0xFF807A70),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 } else {
                     if (downloadError != null) {
