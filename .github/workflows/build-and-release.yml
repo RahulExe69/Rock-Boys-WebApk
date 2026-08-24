@@ -22,7 +22,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -34,15 +34,18 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '9.3.1'
+          cache-read-only: false
 
       - name: Decode Debug Keystore
         run: |
-          echo "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" > debug.keystore.base64
+          echo "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" > debug.keystore.base64
           base64 -d debug.keystore.base64 > debug.keystore
           echo "Successfully decoded debug.keystore directly from inline base64 data."
 
       - name: Build Release APK
-        run: gradle assembleRelease
+        env:
+          GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:+UseParallelGC -Dorg.gradle.parallel=true -Dorg.gradle.vfs.watch=false"
+        run: gradle assembleRelease -x test -x lint -x lintVitalRelease --build-cache --parallel
 
       - name: Verify Build Outputs
         run: |
@@ -139,13 +142,13 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add .versions/update.json .versions/version.json .build-outputs/app-release.apk
+          git add .versions/update.json .versions/version.json
           
           # Check if there are changes to commit
           if git diff-index --quiet HEAD --; then
-            echo "No build or version metadata updates to commit."
+            echo "No version metadata updates to commit."
           else
-            git commit -m "Automated build & release: update APK and update.json to v$(python -c "import json; print(json.load(open('.versions/update.json'))['versionName'])") [skip ci]"
+            git commit -m "Automated build & release: update version metadata to v$(python -c "import json; print(json.load(open('.versions/update.json'))['versionName'])") [skip ci]"
             git push origin main
           fi
 

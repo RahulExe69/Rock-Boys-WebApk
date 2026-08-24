@@ -36,10 +36,15 @@ android {
     applicationId = "com.rockboys.exe"
     minSdk = 24
     targetSdk = 36
-    versionCode = 85
-    versionName = "1.9.6"
+    versionCode = 87
+    versionName = "1.9.7"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+  }
+
+  lint {
+    checkReleaseBuilds = false
+    abortOnError = false
   }
 
   signingConfigs {

@@ -1,7 +1,7 @@
 {
-  "versionCode": 85,
-  "versionName": "1.9.6",
-  "changeLog": "fix: prevent app reload on screen rotation\n\nUpdate to v1.9.6 to handle configuration changes in the main activity, preventing unwanted activity restarts during orientation shifts.",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v1.9.6/app-release.apk",
+  "versionCode": 87,
+  "versionName": "1.9.7",
+  "changeLog": "Optimized CI build speeds with shallow checkout, parallel daemon execution, and build cache tuning.",
+  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v1.9.7/app-release.apk",
   "forceUpdate": true
 }
