@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 2
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -33,7 +33,6 @@ jobs:
       - name: Set up Gradle & Dependency Cache
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.3.1'
           cache-read-only: false
           cache-overwrite-existing: true
           validate-wrappers: false
@@ -41,27 +40,16 @@ jobs:
       - name: Setup Keystore
         run: |
           if [ -f "debug.keystore.base64" ] && [ -s "debug.keystore.base64" ]; then
-            python3 -c '
-          import base64
-          with open("debug.keystore.base64", "rb") as f:
-              data = f.read().replace(b"\n", b"").replace(b"\r", b"").replace(b" ", b"")
-              with open("debug.keystore", "wb") as out:
-                  out.write(base64.b64decode(data))
-          ' || true
+            echo "Restoring official permanent debug.keystore from repository..."
+            base64 -d debug.keystore.base64 > debug.keystore
           fi
           if [ ! -f "debug.keystore" ] || [ ! -s "debug.keystore" ]; then
-            echo "Generating fresh standard Android debug.keystore with keytool..."
-            keytool -genkeypair -v \
-              -keystore debug.keystore \
-              -storepass android \
-              -alias androiddebugkey \
-              -keypass android \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -dname "CN=Android Debug,O=Android,C=US"
+            echo "::error::Official debug.keystore could not be decoded!"
+            exit 1
           fi
-          echo "Successfully verified debug.keystore readiness."
+          echo "Verifying official debug.keystore cryptographic signature..."
+          keytool -list -keystore debug.keystore -storepass android -alias androiddebugkey
+          echo "Successfully verified permanent debug.keystore readiness."
 
       - name: Build Release APK
         env:
