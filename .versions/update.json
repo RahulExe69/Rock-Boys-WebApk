@@ -1,7 +1,7 @@
 {
   "versionCode": 83,
   "versionName": "1.9.5",
-  "changeLog": "Fixed known issues. Optimized in-app updater with 256KB buffer & adaptive fallback, live downloaded size counter, and CDN-accelerated GitHub Releases.",
+  "changeLog": "feat: upgrade to v1.9.5 and optimize in-app updater\n\n- Bump version to 1.9.5 (code 83)\n- Implement buffered 256KB download streams with adaptive fallbacks\n- Add real-time download progress and size tracking\n- Transition to CDN-accelerated GitHub Releases for APK hosting\n- Improve workflow automation for version synchronization",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v1.9.5/app-release.apk",
   "forceUpdate": true
 }
