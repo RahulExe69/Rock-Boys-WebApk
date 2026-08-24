@@ -64,7 +64,7 @@ jobs:
       - name: Build Release APK
         env:
           GRADLE_OPTS: "-Dorg.gradle.jvmargs=-Xmx4096m -XX:+UseParallelGC -Dorg.gradle.parallel=true -Dorg.gradle.vfs.watch=false"
-        run: gradle assembleRelease -x test -x lint -x lintVitalRelease --build-cache --parallel
+        run: gradle :app:assembleRelease -x test --build-cache --parallel
 
       - name: Verify Build Outputs
         run: |
