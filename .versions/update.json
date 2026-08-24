@@ -1,7 +1,0 @@
-{
-  "versionCode": 99,
-  "versionName": "2.0.3",
-  "changeLog": "Seamless in-app installation flow, faster update downloads, and general performance improvements.",
-  "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v2.0.3/app-release.apk",
-  "forceUpdate": true
-}
