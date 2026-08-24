@@ -110,7 +110,7 @@ fun GameWebView(
     var downloadProgressState by remember { mutableStateOf<com.example.network.DownloadProgressState?>(null) }
     var downloadError by remember { mutableStateOf<String?>(null) }
 
-    // Check for raw Github dynamic force updates on startup
+    // Check for dynamic updates from GitHub Releases on startup
     LaunchedEffect(Unit) {
         isCheckingUpdate = true
         try {
@@ -118,19 +118,23 @@ fun GameWebView(
             val updateInfo = com.example.network.UpdateChecker.checkForUpdates()
             if (updateInfo != null) {
                 val runningCode = com.example.network.UpdateChecker.getRunningVersionCode(context)
-                android.util.Log.d("UpdateCheck", "Version details fetched. Running Code: $runningCode, Remote Code: ${updateInfo.versionCode}")
-                if (updateInfo.versionCode > runningCode && updateInfo.forceUpdate) {
-                    android.util.Log.d("UpdateCheck", "New force update available! Displaying force update alert overlay.")
+                val runningName = com.example.network.UpdateChecker.getRunningVersionName(context)
+                val isNewer = com.example.network.UpdateChecker.isNewerVersion(updateInfo.versionName, runningName) || 
+                              (updateInfo.versionCode > 0 && updateInfo.versionCode > runningCode)
+                
+                android.util.Log.d("UpdateCheck", "Version checked. Running: $runningName ($runningCode), Remote: ${updateInfo.versionName} (${updateInfo.versionCode}), isNewer: $isNewer")
+                if (isNewer && updateInfo.forceUpdate) {
+                    android.util.Log.d("UpdateCheck", "New update available! Displaying update screen.")
                     detectedUpdateInfo = updateInfo
                     showForceUpdateScreen = true
                 } else {
-                    android.util.Log.d("UpdateCheck", "Application is fully up to date. Version comparison matched (Running: $runningCode vs Remote: ${updateInfo.versionCode})")
+                    android.util.Log.d("UpdateCheck", "Application is fully up to date.")
                 }
             } else {
-                android.util.Log.e("UpdateCheck", "Could not fetch remote version metadata. Check skipped.")
+                android.util.Log.w("UpdateCheck", "Could not fetch remote version metadata. Check skipped.")
             }
         } catch (e: Exception) {
-            android.util.Log.e("UpdateCheck", "Failure executing state check tasks: ${e.message}", e)
+            android.util.Log.e("UpdateCheck", "Failure executing update check tasks: ${e.message}", e)
         } finally {
             isCheckingUpdate = false
         }

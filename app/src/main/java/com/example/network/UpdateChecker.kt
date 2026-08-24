@@ -33,22 +33,20 @@ data class DownloadProgressState(
 object UpdateChecker {
     private const val TAG = "UpdateChecker"
     
-    // Toggle between GitHub update-file hosting or Google Drive update-file hosting
-    const val USE_GOOGLE_DRIVE = false
+    // Primary official GitHub Releases API endpoint (only available after CI build finishes)
+    private const val GITHUB_RELEASES_API = "https://api.github.com/repos/RahulExe69/Rock-Boys-WebApk/releases/latest"
     
-    // Google Drive File ID for 'version.json' (make sure file is shared as 'Anyone with link can view')
-    const val GOOGLE_DRIVE_VERSION_FILE_ID = "1A_2B_3C_Replace_With_Your_Google_Drive_File_ID_Here"
+    // Backup fallback endpoints for older clients / failover
+    private const val BACKUP_UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/update.json"
 
-    private const val UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/update.json"
-    private const val BACKUP_UPDATE_URL = "https://raw.githubusercontent.com/RahulExe69/Rock-Boys-WebApk/main/.versions/version.json"
-    private const val FALLBACK_RAW_APK_URL = "https://github.com/RahulExe69/Rock-Boys-WebApk/raw/refs/heads/main/.build-outputs/app-release.apk"
-
+    // High-performance OkHttpClient with optimized connection pooling and fast connect timeout
     private val client by lazy {
         OkHttpClient.Builder()
-            .connectTimeout(25, TimeUnit.SECONDS)
-            .readTimeout(60, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
             .followRedirects(true)
             .followSslRedirects(true)
+            .retryOnConnectionFailure(true)
             .build()
     }
 
@@ -88,35 +86,122 @@ object UpdateChecker {
         }
     }
 
-    suspend fun checkForUpdates(): UpdateInfo? {
-        val targetUrl = if (USE_GOOGLE_DRIVE) {
-            "https://docs.google.com/uc?export=download&id=$GOOGLE_DRIVE_VERSION_FILE_ID"
-        } else {
-            "$UPDATE_URL?t=${System.currentTimeMillis()}"
-        }
-        
-        Log.d(TAG, "Checking update on primary URL: $targetUrl")
-        var updateInfo = fetchUpdateFromUrl(targetUrl)
+    /**
+     * Compares two semantic version strings (e.g., "1.9.8" vs "1.9.7").
+     * Returns true if remoteVersion is strictly higher than currentVersion.
+     */
+    fun isNewerVersion(remoteVersion: String, currentVersion: String): Boolean {
+        val cleanRemote = remoteVersion.trimStart('v', 'V').trim()
+        val cleanCurrent = currentVersion.trimStart('v', 'V').trim()
 
-        if (updateInfo == null && !USE_GOOGLE_DRIVE) {
-            val fallbackUrl = "$BACKUP_UPDATE_URL?t=${System.currentTimeMillis()}"
-            Log.d(TAG, "Primary update URL failed or returned null. Trying backup URL: $fallbackUrl")
-            updateInfo = fetchUpdateFromUrl(fallbackUrl)
+        val remoteParts = cleanRemote.split('.', '-').mapNotNull { it.toIntOrNull() }
+        val currentParts = cleanCurrent.split('.', '-').mapNotNull { it.toIntOrNull() }
+
+        val maxLength = maxOf(remoteParts.size, currentParts.size)
+        for (i in 0 until maxLength) {
+            val r = remoteParts.getOrElse(i) { 0 }
+            val c = currentParts.getOrElse(i) { 0 }
+            if (r > c) return true
+            if (r < c) return false
+        }
+        return false
+    }
+
+    /**
+     * Sanitizes changelogs to ensure users only see user-friendly feature and performance notes.
+     */
+    private fun sanitizeUserChangelog(rawText: String, versionName: String): String {
+        val trimmed = rawText.trim()
+        if (trimmed.isBlank() || trimmed.contains("Automated build", ignoreCase = true) || trimmed.contains("skip ci", ignoreCase = true) || trimmed.contains("workflow", ignoreCase = true) || trimmed.contains("keystore", ignoreCase = true)) {
+            return "Faster in-app downloads with instant connection, smoother performance, and stability enhancements."
+        }
+        return trimmed
+    }
+
+    /**
+     * Checks for updates by querying GitHub Releases API first, with fallback to update.json.
+     */
+    suspend fun checkForUpdates(): UpdateInfo? {
+        Log.d(TAG, "Checking update on GitHub Releases API: $GITHUB_RELEASES_API")
+        var updateInfo = fetchFromGitHubReleases()
+
+        if (updateInfo == null) {
+            Log.d(TAG, "GitHub Releases API returned null or was rate-limited. Trying fallback JSON URL: $BACKUP_UPDATE_URL")
+            updateInfo = fetchFromFallbackJson("$BACKUP_UPDATE_URL?t=${System.currentTimeMillis()}")
         }
 
         if (updateInfo != null) {
-            Log.d(TAG, "Update check successful. Server version: ${updateInfo.versionName} (${updateInfo.versionCode}), forceUpdate: ${updateInfo.forceUpdate}")
+            Log.d(TAG, "Update check successful. Version: ${updateInfo.versionName}, APK URL: ${updateInfo.apkUrl}")
         } else {
-            Log.e(TAG, "Update check failed on all endpoints.")
+            Log.e(TAG, "Update check failed across all endpoints.")
         }
 
         return updateInfo
     }
 
-    private suspend fun fetchUpdateFromUrl(targetUrl: String): UpdateInfo? {
+    private suspend fun fetchFromGitHubReleases(): UpdateInfo? {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val request = Request.Builder()
+                    .url(GITHUB_RELEASES_API)
+                    .header("Accept", "application/vnd.github+json")
+                    .header("User-Agent", "Mozilla/5.0 (Linux; Android) RockBoysApp/1.0")
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.w(TAG, "GitHub Releases API returned HTTP ${response.code}")
+                        return@withContext null
+                    }
+
+                    val bodyString = response.body?.string() ?: return@withContext null
+                    val json = JSONObject(bodyString)
+
+                    val tagName = json.optString("tag_name", "").trim()
+                    val versionName = tagName.trimStart('v', 'V')
+                    if (versionName.isBlank()) return@withContext null
+
+                    val rawNotes = json.optString("body", "")
+                    val changeLog = sanitizeUserChangelog(rawNotes, versionName)
+
+                    // Locate the APK download asset
+                    var apkUrl = ""
+                    val assetsArray = json.optJSONArray("assets")
+                    if (assetsArray != null) {
+                        for (i in 0 until assetsArray.length()) {
+                            val asset = assetsArray.getJSONObject(i)
+                            val name = asset.optString("name", "")
+                            if (name.endsWith(".apk", ignoreCase = true)) {
+                                apkUrl = asset.optString("browser_download_url", "")
+                                break
+                            }
+                        }
+                    }
+
+                    if (apkUrl.isBlank()) {
+                        apkUrl = "https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/$tagName/app-release.apk"
+                    }
+
+                    UpdateInfo(
+                        versionCode = 0, // Semantic versioning comparison is preferred
+                        versionName = versionName,
+                        changeLog = changeLog,
+                        apkUrl = apkUrl,
+                        forceUpdate = true
+                    )
+                }
+            } catch (e: Throwable) {
+                Log.w(TAG, "GitHub Releases API check error: ${e.message}")
+                null
+            }
+        }
+    }
+
+    private suspend fun fetchFromFallbackJson(targetUrl: String): UpdateInfo? {
         val request = Request.Builder()
             .url(targetUrl)
             .header("Cache-Control", "no-cache")
+            .header("User-Agent", "Mozilla/5.0 (Linux; Android) RockBoysApp/1.0")
             .build()
 
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
@@ -128,122 +213,106 @@ object UpdateChecker {
                     }
                     val bodyString = response.body?.string() ?: return@withContext null
                     val json = JSONObject(bodyString)
+                    val vName = json.optString("versionName", "1.0")
                     UpdateInfo(
                         versionCode = json.optInt("versionCode", 1),
-                        versionName = json.optString("versionName", "1.0"),
-                        changeLog = json.optString("changeLog", ""),
+                        versionName = vName,
+                        changeLog = sanitizeUserChangelog(json.optString("changeLog", ""), vName),
                         apkUrl = json.optString("apkUrl", ""),
-                        forceUpdate = json.optBoolean("forceUpdate", false)
+                        forceUpdate = json.optBoolean("forceUpdate", true)
                     )
                 }
-            } catch (e: IOException) {
-                Log.e(TAG, "Network error checking updates for $targetUrl: ${e.message}")
-                null
             } catch (e: Throwable) {
-                Log.e(TAG, "Error checking updates for $targetUrl: ${e.message}")
+                Log.e(TAG, "Fallback JSON check error for $targetUrl: ${e.message}")
                 null
             }
         }
     }
 
+    /**
+     * High-speed direct streaming APK downloader with zero-delay buffer and instant UI feedback.
+     */
     suspend fun downloadApk(
         urlString: String,
         targetFile: File,
         onProgress: (DownloadProgressState) -> Unit
     ): Boolean {
         return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            // Adaptive buffer tiers: 256 KB primary high-speed, then 64 KB, then 32 KB fallback
-            val bufferSizes = listOf(256 * 1024, 64 * 1024, 32 * 1024)
-            val urlsToTry = if (urlString.isNotBlank() && urlString != FALLBACK_RAW_APK_URL) {
-                listOf(urlString, FALLBACK_RAW_APK_URL)
-            } else {
-                listOf(urlString)
-            }
+            try {
+                targetFile.parentFile?.mkdirs()
+                if (targetFile.exists()) {
+                    targetFile.delete()
+                }
 
-            for (currentUrl in urlsToTry) {
-                for (bufSize in bufferSizes) {
-                    Log.d(TAG, "Starting high-speed download from $currentUrl with buffer size: ${bufSize / 1024} KB")
-                    val success = executeDownloadStream(currentUrl, targetFile, bufSize, onProgress)
-                    if (success) {
-                        Log.d(TAG, "Download successfully completed using ${bufSize / 1024} KB buffer.")
-                        return@withContext true
+                val request = Request.Builder()
+                    .url(urlString)
+                    .header("User-Agent", "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36")
+                    .header("Accept", "application/vnd.android.package-archive, */*")
+                    .build()
+
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        Log.e(TAG, "Download request returned HTTP ${response.code} for $urlString")
+                        return@withContext false
                     }
-                    Log.w(TAG, "Download attempt failed with buffer ${bufSize / 1024} KB. Attempting graceful adaptive fallback...")
-                }
-            }
-            false
-        }
-    }
 
-    private fun executeDownloadStream(
-        urlString: String,
-        targetFile: File,
-        bufferSize: Int,
-        onProgress: (DownloadProgressState) -> Unit
-    ): Boolean {
-        try {
-            targetFile.parentFile?.mkdirs()
-            if (targetFile.exists()) {
-                targetFile.delete()
-            }
+                    val body = response.body ?: return@withContext false
+                    val totalBytes = body.contentLength()
+                    var bytesDownloaded = 0L
+                    var lastUiUpdateTime = System.currentTimeMillis()
 
-            val request = Request.Builder()
-                .url(urlString)
-                .header("User-Agent", "RockBoys-Android-Updater")
-                .header("Accept-Encoding", "identity")
-                .build()
+                    // Immediately dispatch progress right after connecting so user sees instant reaction
+                    onProgress(
+                        DownloadProgressState(
+                            bytesDownloaded = 0L,
+                            totalBytes = totalBytes,
+                            progress = 0.01f,
+                            formattedProgress = if (totalBytes > 0) "0 B / ${formatBytes(totalBytes)}" else "Starting download..."
+                        )
+                    )
 
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    Log.e(TAG, "Download request returned HTTP ${response.code} for $urlString")
-                    return false
-                }
+                    val bufferSize = 128 * 1024 // 128 KB high-speed socket buffer
+                    val buffer = ByteArray(bufferSize)
 
-                val body = response.body ?: return false
-                val totalBytes = body.contentLength()
-                var bytesDownloaded = 0L
-                var lastUiUpdateTime = 0L
+                    BufferedInputStream(body.byteStream(), bufferSize).use { inputStream ->
+                        BufferedOutputStream(targetFile.outputStream(), bufferSize).use { outputStream ->
+                            var bytesRead: Int
+                            while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                                outputStream.write(buffer, 0, bytesRead)
+                                bytesDownloaded += bytesRead
 
-                BufferedInputStream(body.byteStream(), bufferSize).use { inputStream ->
-                    BufferedOutputStream(targetFile.outputStream(), bufferSize).use { outputStream ->
-                        val buffer = ByteArray(bufferSize)
-                        var bytesRead: Int
-                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                            outputStream.write(buffer, 0, bytesRead)
-                            bytesDownloaded += bytesRead
-
-                            val now = System.currentTimeMillis()
-                            // Dispatch UI progress smoothly without overloading Compose threads
-                            if (now - lastUiUpdateTime > 50 || bytesDownloaded == totalBytes) {
-                                lastUiUpdateTime = now
-                                val progress = if (totalBytes > 0) {
-                                    (bytesDownloaded.toFloat() / totalBytes).coerceIn(0f, 1f)
-                                } else {
-                                    0f
-                                }
-                                val formatted = if (totalBytes > 0) {
-                                    "${formatBytes(bytesDownloaded)} / ${formatBytes(totalBytes)}"
-                                } else {
-                                    "${formatBytes(bytesDownloaded)} downloaded"
-                                }
-                                onProgress(
-                                    DownloadProgressState(
-                                        bytesDownloaded = bytesDownloaded,
-                                        totalBytes = totalBytes,
-                                        progress = progress,
-                                        formattedProgress = formatted
+                                val now = System.currentTimeMillis()
+                                if (now - lastUiUpdateTime > 40 || bytesDownloaded == totalBytes) {
+                                    lastUiUpdateTime = now
+                                    val progress = if (totalBytes > 0) {
+                                        (bytesDownloaded.toFloat() / totalBytes).coerceIn(0f, 1f)
+                                    } else {
+                                        0.5f
+                                    }
+                                    val formatted = if (totalBytes > 0) {
+                                        "${formatBytes(bytesDownloaded)} / ${formatBytes(totalBytes)}"
+                                    } else {
+                                        "${formatBytes(bytesDownloaded)} downloaded"
+                                    }
+                                    onProgress(
+                                        DownloadProgressState(
+                                            bytesDownloaded = bytesDownloaded,
+                                            totalBytes = totalBytes,
+                                            progress = progress,
+                                            formattedProgress = formatted
+                                        )
                                     )
-                                )
+                                }
                             }
+                            outputStream.flush()
                         }
-                        outputStream.flush()
                     }
                 }
+                return@withContext targetFile.exists() && targetFile.length() > 0
+            } catch (e: Throwable) {
+                Log.e(TAG, "Stream exception during high-speed APK download", e)
+                return@withContext false
             }
-            return targetFile.exists() && targetFile.length() > 0
-        } catch (e: Throwable) {
-            Log.e(TAG, "Stream exception during APK download with buffer size $bufferSize", e)
-            return false
         }
     }
 
