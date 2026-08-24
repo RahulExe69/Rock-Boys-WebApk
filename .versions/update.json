@@ -1,7 +1,7 @@
 {
   "versionCode": 91,
   "versionName": "1.9.9",
-  "changeLog": "Seamless in-app installation flow, faster update downloads, and general performance improvements.",
+  "changeLog": "Faster in-app downloads with instant connection, smoother performance, and stability enhancements.",
   "apkUrl": "https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v1.9.9/app-release.apk",
   "forceUpdate": true
 }
