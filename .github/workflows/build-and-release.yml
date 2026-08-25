@@ -38,15 +38,10 @@ jobs:
           validate-wrappers: false
 
       - name: Setup Keystore
+        env:
+          KEYSTORE_BASE64: "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"
         run: |
-          if [ -f "debug.keystore.base64" ] && [ -s "debug.keystore.base64" ]; then
-            echo "Restoring official permanent debug.keystore from repository..."
-            base64 -d debug.keystore.base64 > debug.keystore
-          fi
-          if [ ! -f "debug.keystore" ] || [ ! -s "debug.keystore" ]; then
-            echo "::error::Official debug.keystore could not be decoded!"
-            exit 1
-          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > debug.keystore
           echo "Verifying official debug.keystore cryptographic signature..."
           keytool -list -keystore debug.keystore -storepass android -alias androiddebugkey
           echo "Successfully verified permanent debug.keystore readiness."
@@ -82,55 +77,3 @@ jobs:
             --title "Rock Boys App v${VERSION_NAME}" \
             --notes "Rock Boys update v${VERSION_NAME}. High-speed direct downloads and performance enhancements." \
             --latest
-
-      - name: Synchronize Legacy Version Files
-        run: |
-          python3 - << 'EOF'
-          import json, os, subprocess, re
-
-          with open('app/build.gradle.kts', 'r') as f:
-              gradle_txt = f.read()
-
-          v_code_match = re.search(r'versionCode\s*=\s*(\d+)', gradle_txt)
-          v_name_match = re.search(r'versionName\s*=\s*"([^"]+)"', gradle_txt)
-
-          version_code = int(v_code_match.group(1)) if v_code_match else 1
-          version_name = v_name_match.group(1) if v_name_match else "1.0.0"
-
-          try:
-              commit_msg = subprocess.check_output(['git', 'log', '-1', '--pretty=%B']).decode('utf-8').strip()
-              tech_terms = ['ci', 'workflow', 'action', 'keystore', 'base64', 'gradle', 'build', 'commit', 'git', 'agent', 'keepversion', 'merge']
-              if any(term in commit_msg.lower() for term in tech_terms) or len(commit_msg) < 5:
-                  commit_msg = "Faster in-app downloads with instant connection, smoother performance, and stability enhancements."
-          except Exception:
-              commit_msg = "Faster in-app downloads with instant connection, smoother performance, and stability enhancements."
-
-          data = {
-              "versionCode": version_code,
-              "versionName": version_name,
-              "changeLog": commit_msg,
-              "apkUrl": f"https://github.com/RahulExe69/Rock-Boys-WebApk/releases/download/v{version_name}/app-release.apk",
-              "forceUpdate": True
-          }
-
-          os.makedirs('.versions', exist_ok=True)
-          with open('.versions/update.json', 'w', encoding='utf-8') as f:
-              json.dump(data, f, indent=2, ensure_ascii=False)
-          with open('.versions/version.json', 'w', encoding='utf-8') as f:
-              json.dump(data, f, indent=2, ensure_ascii=False)
-          print(f"Generated legacy version JSONs for v{version_name} ({version_code})")
-          EOF
-
-      - name: Commit and Push Release Updates
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          git add .versions/update.json .versions/version.json
-          
-          if git diff-index --quiet HEAD --; then
-            echo "No version metadata updates to commit."
-          else
-            git commit -m "Automated build & release: update version metadata [skip ci]"
-            git push origin main
-          fi
